@@ -5,7 +5,7 @@
 SmartCare 是一个多模块协作项目，主要目录：
 
 - `frontend/` 前端代码
-- `backend/` 后端代码
+- `backend/` 后端代码（Spring Boot）
 - `ai-service/` AI 服务代码
 - `database/` 数据库脚本与结构
 - `docs/` 项目文档
@@ -13,8 +13,9 @@ SmartCare 是一个多模块协作项目，主要目录：
 ## 2. 首次接入
 
 1. 克隆仓库并进入项目目录
-2. 安装 Node.js（建议 LTS）
-3. 在仓库根目录执行：
+2. 安装 JDK 17+ 与 Maven（用于后端 Spring Boot 开发）
+3. 安装 Node.js（用于仓库提交规范工具）
+4. 在仓库根目录执行：
 
 ```bash
 npm install
