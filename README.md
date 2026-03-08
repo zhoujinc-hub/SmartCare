@@ -23,10 +23,10 @@ npm run prepare
 
 请先阅读：
 
-- [docs/onboarding.md](docs/onboarding.md)
+- `docs/onboarding.md`
 
 ## 提交规范
 
 请参考：
 
-- [docs/git_commit_convention.md](docs/git_commit_convention.md)
+- `docs/git_commit_convention.md`
