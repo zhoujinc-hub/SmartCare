@@ -7,8 +7,8 @@ class PersonDetector:
         self.model = YOLO(model_path)
 
     def detect(self, frame):
-
-        results = self.model(frame)
+        #只检测 person
+        results = self.model(frame, classes=[0])
 
         persons = []
 
@@ -26,7 +26,8 @@ class PersonDetector:
                         "x": int(x1),
                         "y": int(y1),
                         "w": int(x2 - x1),
-                        "h": int(y2 - y1)
+                        "h": int(y2 - y1),
+
                     })
 
         return persons
