@@ -1,9 +1,11 @@
+#识别人体
+
 from ultralytics import YOLO
 
 
 class PersonDetector:
 
-    def __init__(self, model_path="yolov8n.pt"):
+    def __init__(self, model_path="models/yolov8n.pt"):
         self.model = YOLO(model_path)
 
     def detect(self, frame):

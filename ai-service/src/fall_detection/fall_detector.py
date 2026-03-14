@@ -1,3 +1,5 @@
+#业务逻辑：检测跌倒
+
 class FallDetector:
 
     def __init__(self, ratio_threshold=1.2):
@@ -14,7 +16,7 @@ class FallDetector:
         ratio = h / w
 
         # 跌倒判断
-        if ratio < self.ratio_threshold:
-            return True
+        fall_condition = ratio < self.ratio_threshold
 
-        return False
+
+        return fall_condition, ratio
