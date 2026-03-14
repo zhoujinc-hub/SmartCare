@@ -1,4 +1,5 @@
 <template>
+  <!-- 这个文件是布局文件，用于整理整个前端的页面是如何布局的 -->
 
   <el-container style="height:100vh">
 
