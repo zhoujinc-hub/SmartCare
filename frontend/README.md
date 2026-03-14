@@ -56,7 +56,7 @@ Web 管理平台
 
 # 3. 项目运行
 
-安装依赖：
+安装依赖：记得所有命令都在smart/frontend的终端运行！！！
 
 ```
 npm install
@@ -78,40 +78,49 @@ npm run build
 
 # 4. 项目目录结构
 
-推荐目录结构：
+目录结构：
 
 ```
-smartcare-web
-│
-├─ src
-│
-│  ├─ api
-│  │   ├─ request.ts
-│  │   ├─ alerts.ts
-│  │   └─ elders.ts
-│  │
-│  ├─ views
-│  │   ├─ Dashboard.vue
-│  │   ├─ Alerts.vue
-│  │   └─ Elders.vue
-│  │
-│  ├─ layout
-│  │   └─ MainLayout.vue
-│  │
-│  ├─ router
-│  │   └─ index.ts
-│  │
-│  ├─ store
-│  │   └─ index.ts
-│  │
-│  ├─ types
-│  │   ├─ alert.ts
-│  │   └─ elder.ts
-│  │
-│  ├─ App.vue
-│  └─ main.ts
-│
-└─ package.json
+src
+ ├─ api
+ │   ├─ alerts.ts
+ │   ├─ elders.ts
+ │
+ ├─ assets
+ │
+ ├─ components
+ │   ├─ AlertTable.vue
+ │   └─ StatCard.vue
+ │
+ ├─ composables
+ │   ├─ useAlerts.ts
+ │   └─ useElders.ts
+ │
+ ├─ layouts
+ │   └─ MainLayout.vue
+ │
+ ├─ router
+ │   └─ index.ts
+ │
+ ├─ stores
+ │   └─ alertStore.ts
+ │
+ ├─ types
+ │   ├─ alert.ts
+ │   ├─ elder.ts
+ │   ├─ event.ts
+ │   └─ api.ts
+ │
+ ├─ utils
+ │   └─ request.ts
+ │
+ ├─ views
+ │   ├─ Dashboard.vue
+ │   ├─ Alerts.vue
+ │   └─ Elders.vue
+ │
+ ├─ App.vue
+ └─ main.ts
 ```
 
 目录说明：
@@ -124,26 +133,6 @@ smartcare-web
 | router | 路由管理         |
 | store  | 全局状态         |
 | types  | TypeScript类型 |
-
----
-
-# 5. Element Plus 引入
-
-在 `main.ts` 中引入 Element Plus。
-
-```ts
-import { createApp } from "vue"
-import App from "./App.vue"
-
-import ElementPlus from "element-plus"
-import "element-plus/dist/index.css"
-
-const app = createApp(App)
-
-app.use(ElementPlus)
-
-app.mount("#app")
-```
 
 ---
 
@@ -172,7 +161,7 @@ el-main
 
 ---
 
-# 7. 开发流程
+# 7. 开发流程(不必完全一致)
 
 推荐开发顺序：
 
