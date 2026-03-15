@@ -7,7 +7,7 @@ class FallDetector:
         self.fall_frame = fall_frame
         self.fall_frame_count = 0
 
-    def detect(self, person):
+    def fall_detect(self, person):
 
         w = person["w"]
         h = person["h"]
@@ -26,4 +26,4 @@ class FallDetector:
         fall_condition = self.fall_frame_count >= self.fall_frame
 
 
-        return fall_condition, ratio
+        return fall_condition, ratio,self.fall_frame_count

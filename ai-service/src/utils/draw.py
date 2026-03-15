@@ -1,7 +1,7 @@
 import cv2
 
 
-def draw_person(frame, person, fall_condition, ratio):
+def draw_person(frame, person, fall_condition, ratio, fall_frame_count):
 
     x = person["x"]
     y = person["y"]
@@ -10,10 +10,10 @@ def draw_person(frame, person, fall_condition, ratio):
 
     if fall_condition:
         color = (0, 0, 255)
-        label = f"FALL r:{ratio:.2f}"
+        label = f"FALL r:{ratio:.2f} f:{fall_frame_count}"
     else:
         color = (0, 255, 0)
-        label = f"Person r:{ratio:.2f}"
+        label = f"Person r:{ratio:.2f} f:{fall_frame_count}"
 
     cv2.rectangle(frame, (x, y), (x+w, y+h), color, 2)
 

@@ -5,10 +5,12 @@ from ultralytics import YOLO
 
 class PersonDetector:
 
-    def __init__(self, model_path="models/yolov8n.pt"):
-        self.model = YOLO(model_path)
+    def __init__(self, model_manager, model_name):
 
-    def detect(self, frame):
+        self.model_manager = model_manager
+        self.model= self.model_manager.get_model(model_name)
+
+    def person_detect(self, frame):
         #只检测 person
         results = self.model(frame, classes=[0])
 
