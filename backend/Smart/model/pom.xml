@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- 子模块必须继承【你的根父工程】，而非直接继承Spring Boot -->
+    <parent>
+        <groupId>com.smartcare</groupId>   <!-- 你的根父工程groupId -->
+        <artifactId>Smart</artifactId>    <!-- 你的根父工程artifactId -->
+        <version>1.0-SNAPSHOT</version>   <!-- 你的根父工程版本 -->
+    </parent>
+
+    <!-- 子模块自身标识（只需要artifactId，groupId/version继承父工程） -->
+    <artifactId>model</artifactId>
+
+    <properties>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <dependencies>
+        <!-- MyBatis-Plus（版本由根父工程的dependencyManagement管理） -->
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-boot-starter</artifactId>
+        </dependency>
+
+        <!-- Knife4j（版本由根父工程管理） -->
+        <dependency>
+            <groupId>com.github.xiaoymin</groupId>
+            <artifactId>knife4j-openapi3-jakarta-spring-boot-starter</artifactId>
+        </dependency>
+
+        <!-- Lombok（Spring Boot父依赖已内置版本） -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+
+        <!-- 可选：Spring Boot基础依赖（子模块如需使用Spring上下文则添加） -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+        </dependency>
+    </dependencies>
+</project>
