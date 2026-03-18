@@ -16,6 +16,7 @@
 
 
 
+
 ## 3.项目结构
 
 ```
@@ -26,6 +27,8 @@ ai-service
 │   └── pose_model/
 │
 ├── src/
+│   │
+│   ├── api/   
 │   │
 │   ├── camera/                 # 视频输入
 │   │   └── camera.py
