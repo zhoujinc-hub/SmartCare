@@ -79,11 +79,13 @@ const alertList: AlertItem[] = [
 </script>
 
 <style scoped>
-/* 整体容器 */
+/* 整体容器 - 白色主题 */
 .dashboard-container {
   width: 100%;
   height: 100%;
-  color: #fff;
+  color: #333333;
+  background-color: #f9f9f9;
+  padding: 0;
 }
 
 /* 顶部数字卡片组 */
@@ -95,8 +97,10 @@ const alertList: AlertItem[] = [
 
 .stat-card {
   flex: 1;
-  background-color: #1a2a4a;
-  border: 1px solid #2a4a8a;
+  background-color: #ffffff;
+  border: 1px solid #e6e6e6;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
 .stat-item {
@@ -106,7 +110,7 @@ const alertList: AlertItem[] = [
 
 .stat-label {
   font-size: 14px;
-  color: #a0bfff;
+  color: #666666;
   display: block;
   margin-bottom: 8px;
 }
@@ -114,7 +118,7 @@ const alertList: AlertItem[] = [
 .stat-value {
   font-size: 24px;
   font-weight: bold;
-  color: #409eff;
+  color: #000000;
 }
 
 /* 中间内容行 */
@@ -132,11 +136,13 @@ const alertList: AlertItem[] = [
   flex: 1;
 }
 
-/* 图表/地图占位卡片 */
+/* 图表/地图占位卡片 - 白色主题 */
 .chart-card {
   height: 100%;
-  background-color: #1a2a4a;
-  border: 1px solid #2a4a8a;
+  background-color: #ffffff;
+  border: 1px solid #e6e6e6;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
 .chart-placeholder {
@@ -144,32 +150,58 @@ const alertList: AlertItem[] = [
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #a0bfff;
+  color: #666666;
   font-size: 18px;
-  border: 1px dashed #4a6a9a;
+  border: 1px dashed #d9d9d9;
+  background-color: #fafafa;
 }
 
-/* 右侧列表卡片 */
+/* 右侧列表卡片 - 白色主题 */
 .list-card {
   height: 100%;
-  background-color: #1a2a4a;
-  border: 1px solid #2a4a8a;
+  background-color: #ffffff;
+  border: 1px solid #e6e6e6;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
 .list-header {
   font-size: 16px;
-  padding: 10px 0;
-  border-bottom: 1px solid #2a4a8a;
+  padding: 10px 20px;
+  border-bottom: 1px solid #e6e6e6;
   margin-bottom: 10px;
-  color: #409eff;
+  color: #1f2937;
+  font-weight: 600;
 }
 
-/* 数据表格 */
+/* 数据表格 - 白色主题 */
 .data-table {
-  --el-table-text-color: #fff;
-  --el-table-header-text-color: #a0bfff;
-  --el-table-row-hover-bg-color: #2a3a5a;
-  --el-table-border-color: #2a4a8a;
-  --el-table-bg-color: transparent;
+  --el-table-text-color: #333333;
+  --el-table-header-text-color: #1f2937;
+  --el-table-row-hover-bg-color: #f0f9ff;
+  --el-table-border-color: #e6e6e6;
+  --el-table-bg-color: #ffffff;
+  --el-table-header-text-color: #666666;
+  --el-table-stripe-bg-color: #fafafa;
+}
+
+/* 修复Element UI卡片默认样式 */
+:deep(.el-card) {
+  --el-card-bg-color: #ffffff;
+  --el-card-border-color: #e6e6e6;
+  --el-card-header-text-color: #333333;
+}
+
+:deep(.el-card__body) {
+  padding: 20px;
+}
+
+/* 表格单元格样式优化 */
+:deep(.el-table__cell) {
+  border-color: #e6e6e6 !important;
+}
+
+:deep(.el-table .el-table__header-wrapper .el-table__cell > .cell) {
+  font-weight: 600;
 }
 </style>
