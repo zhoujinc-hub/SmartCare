@@ -2,10 +2,10 @@
 
 SmartCare 是一个校内小团队协作项目，当前采用多模块结构：
 
-- `frontend/` 前端
+- `frontend/` 前端(vue)
 - `backend/` 后端（Spring Boot）
-- `ai-service/` AI 服务
-- `database/` 数据库脚本
+- `ai-service/` AI 服务(opencv+Yolov8)
+- `database/` 数据库脚本(mysql)
 - `docs/` 项目文档
 
 ## 快速开始
@@ -23,10 +23,10 @@ npm run prepare
 
 请先阅读：
 
-- `docs/onboarding.md`
+- [docs/onboarding.md](docs/onboarding.md)
 
 ## 提交规范
 
 请参考：
 
-- `docs/git_commit_convention.md`
+- [docs/git_commit_convention.md](docs/git_commit_convention.md)
