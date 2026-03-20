@@ -14,7 +14,6 @@
     "echarts": "^6.0.0",
     "element-plus": "^2.13.5",
     "pinia": "^3.0.4",
-    "vue": "^3.5.30",
     "vue-router": "^5.0.3"
   },
   "devDependencies": {
@@ -28,6 +27,7 @@
     "eslint-plugin-vue": "^10.5.0",
     "typescript": "~5.9.3",
     "vite": "^8.0.0",
+    "vue": "^3.5.30",
     "vue-eslint-parser": "^10.4.0",
     "vue-tsc": "^3.2.5"
   }
