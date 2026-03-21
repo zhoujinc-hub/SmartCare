@@ -10,7 +10,13 @@ export default defineConfig({
       '@': resolve(__dirname, 'src')
     }
   },
-  server: {
-    port: 5173
-  }
+    server: {
+        port: 5173,
+        proxy: {
+            "/api": {
+                target: "http://远端服务器:8080",
+                changeOrigin: true
+            }
+        }
+    }
 })
