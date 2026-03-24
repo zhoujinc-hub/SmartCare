@@ -21,6 +21,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <mybatis-plus.version>3.5.12</mybatis-plus.version>
         <knife4j.version>4.1.0</knife4j.version>
+        <mybatis-plus-jsqlparser.version>3.5.12</mybatis-plus-jsqlparser.version>
     </properties>
 
     <dependencies>
@@ -53,7 +54,13 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-jsqlparser</artifactId>
+            <version>${mybatis-plus-jsqlparser.version}</version>
+        </dependency>
     </dependencies>
+
 
     <build>
         <plugins>
