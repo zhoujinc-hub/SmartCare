@@ -43,5 +43,14 @@ public class UsersServiceImpl implements UsersService {
         BeanUtils.copyProperties(user, vo);
         return vo;
     }
+    @Override
+    public void resetPassword(ResetPasswordDto dto) {
+        Users user = usersMapper.selectById(dto.getUserId());
+        if (user == null) {
+            throw new RuntimeException("用户不存在");
+        }
+        user.setPassword(dto.getNewPassword());
+        usersMapper.updateById(user);
+    }
 
 }
