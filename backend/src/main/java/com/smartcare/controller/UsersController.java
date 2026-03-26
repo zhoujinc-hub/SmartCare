@@ -1,43 +1,26 @@
 package com.smartcare.controller;
 
-import com.smartcare.entity.Users;
-import com.smartcare.service.impl.UsersServiceImpl;
+import com.smartcare.common.Result;
+import com.smartcare.dto.user.LoginDto;
+import com.smartcare.dto.user.ResetPasswordDto;
+import com.smartcare.service.UsersService;
+import com.smartcare.vo.user.LoginVo;
+import com.smartcare.vo.user.UserSimpleVo;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/api/user")
+@RequiredArgsConstructor
 public class UsersController {
 
-    private final UsersServiceImpl usersService;
+    private final UsersService usersService;
 
-    public UsersController(UsersServiceImpl usersService) {
-        this.usersService = usersService;
+    @PostMapping("/login")
+    public Result<LoginVo> login(@RequestBody LoginDto dto) {
+        return Result.ok(usersService.login(dto));
     }
 
-    @GetMapping("/list")
-    public List<Users> list() {
-        return usersService.list();
-    }
-
-    @GetMapping("/{id}")
-    public Users getById(@PathVariable Long id) {
-        return usersService.getById(id);
-    }
-
-    @PostMapping("/save")
-    public boolean save(@RequestBody Users users) {
-        return usersService.save(users);
-    }
-
-    @PutMapping("/update")
-    public boolean update(@RequestBody Users users) {
-        return usersService.updateById(users);
-    }
-
-    @DeleteMapping("/{id}")
-    public boolean delete(@PathVariable Long id) {
-        return usersService.removeById(id);
-    }
 }
