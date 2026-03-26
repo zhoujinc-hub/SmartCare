@@ -1,8 +1,15 @@
 package com.smartcare.service;
 
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.smartcare.entity.Users;
-import com.smartcare.mapper.UsersMapper;
+import com.smartcare.dto.user.LoginDto;
+import com.smartcare.dto.user.ResetPasswordDto;
+import com.smartcare.vo.user.LoginVo;
+import com.smartcare.vo.user.UserSimpleVo;
 
-public class UsersService extends ServiceImpl<UsersMapper, Users> {
+import java.util.List;
+
+public interface UsersService {
+
+    LoginVo login(LoginDto dto);
+
+
 }
