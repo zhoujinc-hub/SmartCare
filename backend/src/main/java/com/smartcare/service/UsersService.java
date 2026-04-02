@@ -11,5 +11,7 @@ public interface UsersService {
 
     LoginVo login(LoginDto dto);
 
+    void resetPassword(ResetPasswordDto dto);
+
 
 }
