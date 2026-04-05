@@ -49,9 +49,9 @@ import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
 import type { ForgotForm } from '@/types/user'
 import { sendVerifyCode, resetUserPassword } from '@/api/user'
 
-const props = defineProps<{
-  modelValue: boolean
-}>()
+// const props = defineProps<{
+//   modelValue: boolean
+// }>()
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: boolean): void
@@ -80,7 +80,7 @@ const rules = reactive<FormRules>({
   confirmPassword: [
     { required: true, message: '请确认密码', trigger: 'blur' },
     {
-      validator: (rule, value, callback) => {
+      validator: (_rule, value, callback) => {
         if (value !== form.newPassword) {
           callback(new Error('两次密码输入不一致'))
         } else {
