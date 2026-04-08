@@ -2,19 +2,18 @@ package com.smartcare.controller;
 
 import com.smartcare.entity.Relations;
 import com.smartcare.service.impl.RelationsServiceImpl;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/relations")
 public class RelationsController {
 
     private final RelationsServiceImpl relationsService;
 
-    public RelationsController(RelationsServiceImpl relationsService) {
-        this.relationsService = relationsService;
-    }
 
     @GetMapping("/list")
     public List<Relations> list() {

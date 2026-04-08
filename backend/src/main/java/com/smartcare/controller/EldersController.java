@@ -1,43 +1,31 @@
 package com.smartcare.controller;
 
+import com.smartcare.common.Result;
+import com.smartcare.common.ResultCodeEnum;
+import com.smartcare.dto.elder.ElderQueryDto;
 import com.smartcare.entity.Elders;
 import com.smartcare.service.impl.EldersServiceImpl;
+import com.smartcare.vo.Page.PageVo;
+import com.smartcare.vo.elder.ElderListVo;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/elders")
 public class EldersController {
 
     private final EldersServiceImpl eldersService;
 
-    public EldersController(EldersServiceImpl eldersService) {
-        this.eldersService = eldersService;
-    }
 
-    @GetMapping("/list")
-    public List<Elders> list() {
-        return eldersService.list();
-    }
-
-    @GetMapping("/{id}")
-    public Elders getById(@PathVariable Long id) {
-        return eldersService.getById(id);
-    }
-
-    @PostMapping("/save")
-    public boolean save(@RequestBody Elders elders) {
-        return eldersService.save(elders);
-    }
-
-    @PutMapping("/update")
-    public boolean update(@RequestBody Elders elders) {
-        return eldersService.updateById(elders);
-    }
-
-    @DeleteMapping("/{id}")
-    public boolean delete(@PathVariable Long id) {
-        return eldersService.removeById(id);
+    @PostMapping("/list")
+    public Result<PageVo<ElderListVo>> list(@RequestBody ElderQueryDto dto) {
+        try {
+            return Result.ok(eldersService.list(dto));
+        } catch (Exception e) {
+            return Result.build(null, ResultCodeEnum.FAIL);
+        }
     }
 }
