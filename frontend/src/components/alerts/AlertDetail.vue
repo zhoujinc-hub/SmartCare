@@ -36,7 +36,6 @@ import {
   formatSendMethod,
   formatRecipientType,
   formatTime,
-  formatFallStatus
 } from '@/utils/format'
 import type { AlertLog } from '@/types/alertType'
 import { ElMessage } from 'element-plus'
