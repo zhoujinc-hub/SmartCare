@@ -1,5 +1,5 @@
 import request from '@/utils/request';
-import type { AlertQueryParams, AlertPageResult, AlertLog, HandleAlertParams } from '@/types/alertType';
+import type { AlertQueryParams,HandleAlertParams } from '@/types/alertType';
 
 // 获取告警列表
 export function getAlertList(params: AlertQueryParams) {
