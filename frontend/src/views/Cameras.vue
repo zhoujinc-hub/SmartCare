@@ -134,7 +134,7 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
-import { Search, Plus, View, Edit, Delete, Refresh, SwitchButton, Check, VideoPlay } from '@element-plus/icons-vue';
+import { Search, Plus, View, Edit, Delete, Refresh } from '@element-plus/icons-vue';//我删除了SwitchButton, Check, VideoPlay
 import CameraForm from '@/components/cameras/CameraForm.vue';
 import CameraDetail from '@/components/cameras/CameraDetail.vue';
 import CameraPreview from '@/components/cameras/CameraPreview.vue';

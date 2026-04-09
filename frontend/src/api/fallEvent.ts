@@ -1,7 +1,6 @@
 import request from '../utils/request';
 import type { 
-  AlertItem, 
-  AlertFilterParams, 
+  AlertFilterParams,
   PaginationParams, 
   AlertListResponse, 
   BaseResponse 
