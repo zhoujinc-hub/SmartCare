@@ -29,6 +29,13 @@ export default [
       '@typescript-eslint': tsPlugin
     },
     rules: {
+          // 禁用单行 HTML 元素内容换行检查
+      'vue/singleline-html-element-content-newline': 'off',
+            // 放宽多行 HTML 元素内容换行检查
+      'vue/multiline-html-element-content-newline': ['warn', {
+        ignoreWhenEmpty: true,
+        ignores: ['pre', 'textarea', 'template']
+      }],
       'vue/multi-word-component-names': 'off',
       'no-unused-vars': 'off',
       '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
