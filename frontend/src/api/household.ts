@@ -2,31 +2,21 @@ import request from '../utils/request';
 import type { 
   HouseholdItem, 
   HouseholdFormData, 
-  HouseholdFilterParams, 
-  PaginationParams,
-  BatchThresholdForm,
-  CommunityItem
+  HouseholdFilterParams 
 } from '../types/household';
 
-/**
- * 获取社区列表
- * @returns 社区列表数据
- */
-export const getCommunityList = async (): Promise<{ code: number; data: CommunityItem[]; message: string }> => {
-  return request({
-    url: '/api/communities',
-    method: 'GET'
-  });
-};
+
+// 本地定义分页（无外部依赖）
+interface PaginationParams {
+  pageNum: number;
+  pageSize: number;
+}
 
 /**
  * 获取家庭列表（分页+筛选）
- * @param pagination 分页参数
- * @param filterParams 筛选参数
- * @returns 家庭列表分页数据
  */
 export const getHouseholdList = async (
-  pagination: Pick<PaginationParams, 'pageNum' | 'pageSize'>,
+  pagination: PaginationParams,
   filterParams: HouseholdFilterParams
 ): Promise<{ code: number; data: { records: HouseholdItem[]; total: number }; message: string }> => {
   const params = {
@@ -42,8 +32,6 @@ export const getHouseholdList = async (
 
 /**
  * 获取家庭详情
- * @param householdId 家庭ID
- * @returns 家庭详情数据
  */
 export const getHouseholdDetail = async (householdId: number): Promise<{ code: number; data: HouseholdItem; message: string }> => {
   return request({
@@ -54,8 +42,6 @@ export const getHouseholdDetail = async (householdId: number): Promise<{ code: n
 
 /**
  * 新增家庭
- * @param formData 表单数据
- * @returns 新增结果
  */
 export const addHousehold = async (formData: HouseholdFormData): Promise<{ code: number; message: string }> => {
   return request({
@@ -67,9 +53,6 @@ export const addHousehold = async (formData: HouseholdFormData): Promise<{ code:
 
 /**
  * 编辑家庭
- * @param householdId 家庭ID
- * @param formData 表单数据
- * @returns 编辑结果
  */
 export const updateHousehold = async (
   householdId: number,
@@ -84,32 +67,10 @@ export const updateHousehold = async (
 
 /**
  * 删除家庭
- * @param householdId 家庭ID
- * @returns 删除结果
  */
 export const deleteHousehold = async (householdId: number): Promise<{ code: number; message: string }> => {
   return request({
     url: `/api/households/${householdId}`,
     method: 'DELETE'
-  });
-};
-
-/**
- * 批量更新报警阈值
- * @param householdIds 家庭ID列表
- * @param threshold 报警阈值
- * @returns 更新结果
- */
-export const batchUpdateThreshold = async (
-  householdIds: number[],
-  threshold: number
-): Promise<{ code: number; message: string }> => {
-  return request({
-    url: '/api/households/batch-update-threshold',
-    method: 'POST',
-    data: {
-      householdIds,
-      alertThresholdSeconds: threshold
-    }
   });
 };
