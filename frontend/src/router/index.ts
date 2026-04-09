@@ -6,8 +6,6 @@ import Alerts from "@/views/Alerts.vue";
 import Elders from "@/views/Elders.vue";
 // 新增：导入登录页
 import Login from "@/views/login.vue";
-import Households from '@/views/Households.vue'
-import Cameras from '@/views/Cameras.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -26,9 +24,7 @@ const router = createRouter({
       children: [
         { path: "dashboard", component: Dashboard },
         { path: "alerts", component: Alerts },
-        { path: "elders", component: Elders },
-        { path: "households", component: Households },
-        { path: "cameras", component: Cameras },
+        { path: "elders", component: Elders }
       ]
     }
   ]
