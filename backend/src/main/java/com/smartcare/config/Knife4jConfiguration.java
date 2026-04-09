@@ -11,48 +11,31 @@ public class Knife4jConfiguration {
 
     @Bean
     public OpenAPI customOpenAPI() {
-
         return new OpenAPI().info(
                 new Info()
-                        .title("后台管理系统API")
+                        .title("智慧养老系统API")
                         .version("1.0")
-                        .description("后台管理系统API"));
-    }
-
-    @Bean
-    public GroupedOpenApi systemAPI() {
-
-        return GroupedOpenApi.builder().group("系统信息管理").
-                pathsToMatch(
-                        "/admin/system/**"
-                ).
-                build();
-    }
-
-    @Bean
-    public GroupedOpenApi loginAPI() {
-
-        return GroupedOpenApi.builder().group("后台登录管理").
-                pathsToMatch(
-                        "/admin/login/**",
-                        "/admin/info"
-                ).
-                build();
+                        .description("智慧养老系统接口文档")
+        );
     }
 
     @Bean
     public GroupedOpenApi userAPI() {
-        return GroupedOpenApi.builder().group("平台用户管理").
-                pathsToMatch(
-                        "/admin/user/**"
-                ).build();
+        return GroupedOpenApi.builder()
+                .group("用户管理")
+                .pathsToMatch(
+                        "/api/user/**"
+                )
+                .build();
     }
 
     @Bean
     public GroupedOpenApi allAPI() {
-        return GroupedOpenApi.builder().group("全部接口").
-                pathsToMatch(
+        return GroupedOpenApi.builder()
+                .group("全部接口")
+                .pathsToMatch(
                         "/**"
-                ).build();
+                )
+                .build();
     }
 }

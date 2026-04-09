@@ -49,10 +49,12 @@ import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
 import type { ForgotForm } from '@/types/user'
 import { sendVerifyCode, resetUserPassword } from '@/api/user'
 
-// const props = defineProps<{
-//   modelValue: boolean
-// }>()
+// ✅ 统一 prop 名为 modelValue（适配 v-model 规范）
+const props = defineProps<{
+  modelValue: boolean
+}>()
 
+// ✅ 规范 emit 事件名：kebab-case 格式
 const emit = defineEmits<{
   (e: 'update:modelValue', value: boolean): void
   (e: 'reset-success'): void
@@ -80,7 +82,7 @@ const rules = reactive<FormRules>({
   confirmPassword: [
     { required: true, message: '请确认密码', trigger: 'blur' },
     {
-      validator: (_rule, value, callback) => {
+      validator: (rule, value, callback) => {
         if (value !== form.newPassword) {
           callback(new Error('两次密码输入不一致'))
         } else {
@@ -103,7 +105,7 @@ const sendCode = async () => {
   }
   try {
     const res = await sendVerifyCode(form.phone)
-    if (res.data.code === 200) {
+    if (res.code === 200) {
       ElMessage.success('验证码已发送至您的手机')
       countdown.value = 60
       const timer = setInterval(() => {
@@ -111,7 +113,7 @@ const sendCode = async () => {
         if (countdown.value <= 0) clearInterval(timer)
       }, 1000)
     } else {
-      ElMessage.error(res.data.message || '验证码发送失败')
+      ElMessage.error(res.message || '验证码发送失败')
     }
   } catch (error) {
     console.error('发送验证码接口异常：', error)
@@ -124,12 +126,12 @@ const resetPassword = async () => {
     if (!formRef.value) return
     await formRef.value.validate()
     const res = await resetUserPassword(form)
-    if (res.data.code === 200) {
+    if (res.code === 200) {
       ElMessage.success('密码重置成功，请重新登录')
       emit('update:modelValue', false)
-      emit('reset-success')
+      emit('reset-success') // ✅ 事件名改为 kebab-case
     } else {
-      ElMessage.error(res.data.message || '密码重置失败')
+      ElMessage.error(res.message || '密码重置失败')
     }
   } catch (error) {
     console.error('重置密码接口异常：', error)
