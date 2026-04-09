@@ -45,7 +45,6 @@ const props = defineProps<{
   alertId: bigint | null
 }>()
 
-
 const emit = defineEmits<{
   (e: 'update:visible', value: boolean): void
 }>()
