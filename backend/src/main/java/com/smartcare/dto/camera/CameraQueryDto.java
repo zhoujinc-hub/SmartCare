@@ -6,4 +6,6 @@ import lombok.Data;
 public class CameraQueryDto {
     private String cameraName;
     private Byte status;
+    private Long pageNum = 1L;
+    private Long pageSize = 10L;
 }

@@ -1,43 +1,31 @@
 package com.smartcare.controller;
 
-import com.smartcare.entity.AlertLogs;
-import com.smartcare.service.impl.AlertLogsServiceImpl;
+import com.smartcare.common.Result;
+import com.smartcare.common.ResultCodeEnum;
+import com.smartcare.dto.alert.AlertLogQueryDto;
+import com.smartcare.service.AlertLogsService;
+import com.smartcare.service.FallEventsService;
+import com.smartcare.vo.Page.PageVo;
+import com.smartcare.vo.alert.AlertLogVo;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/alertLogs")
 public class AlertLogsController {
 
-    private final AlertLogsServiceImpl alertLogsService;
 
-    public AlertLogsController(AlertLogsServiceImpl alertLogsService) {
-        this.alertLogsService = alertLogsService;
-    }
+    private final AlertLogsService alertLogsService;
 
-    @GetMapping("/list")
-    public List<AlertLogs> list() {
-        return alertLogsService.list();
-    }
-
-    @GetMapping("/{id}")
-    public AlertLogs getById(@PathVariable Long id) {
-        return alertLogsService.getById(id);
-    }
-
-    @PostMapping("/save")
-    public boolean save(@RequestBody AlertLogs alertLogs) {
-        return alertLogsService.save(alertLogs);
-    }
-
-    @PutMapping("/update")
-    public boolean update(@RequestBody AlertLogs alertLogs) {
-        return alertLogsService.updateById(alertLogs);
-    }
-
-    @DeleteMapping("/{id}")
-    public boolean delete(@PathVariable Long id) {
-        return alertLogsService.removeById(id);
+    @PostMapping("/list")
+    public Result<PageVo<AlertLogVo>> list(@RequestBody AlertLogQueryDto dto) {
+        try {
+            return Result.ok(alertLogsService.list(dto));
+        } catch (Exception e) {
+            return Result.build(null, ResultCodeEnum.FAIL);
+        }
     }
 }

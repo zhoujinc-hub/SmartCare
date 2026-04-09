@@ -1,43 +1,33 @@
 package com.smartcare.controller;
 
+import com.smartcare.common.Result;
+import com.smartcare.common.ResultCodeEnum;
+import com.smartcare.dto.fall.FallEventQueryDto;
 import com.smartcare.entity.FallEvents;
 import com.smartcare.service.impl.FallEventsServiceImpl;
+import com.smartcare.vo.Page.PageVo;
+import com.smartcare.vo.fall.FallEventVo;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/fallEvents")
 public class FallEventsController {
 
     private final FallEventsServiceImpl fallEventsService;
 
-    public FallEventsController(FallEventsServiceImpl fallEventsService) {
-        this.fallEventsService = fallEventsService;
+
+    @PostMapping("/list")
+    public Result<PageVo<FallEventVo>> list(@RequestBody FallEventQueryDto dto) {
+        try {
+            return Result.ok(fallEventsService.list(dto));
+        } catch (Exception e) {
+            return Result.build(null, ResultCodeEnum.FAIL);
+        }
     }
 
-    @GetMapping("/list")
-    public List<FallEvents> list() {
-        return fallEventsService.list();
-    }
 
-    @GetMapping("/{id}")
-    public FallEvents getById(@PathVariable Long id) {
-        return fallEventsService.getById(id);
-    }
-
-    @PostMapping("/save")
-    public boolean save(@RequestBody FallEvents fallEvents) {
-        return fallEventsService.save(fallEvents);
-    }
-
-    @PutMapping("/update")
-    public boolean update(@RequestBody FallEvents fallEvents) {
-        return fallEventsService.updateById(fallEvents);
-    }
-
-    @DeleteMapping("/{id}")
-    public boolean delete(@PathVariable Long id) {
-        return fallEventsService.removeById(id);
-    }
 }
