@@ -49,9 +49,9 @@ import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
 import type { ForgotForm } from '@/types/user'
 import { sendVerifyCode, resetUserPassword } from '@/api/user'
 
-// const props = defineProps<{
-//   modelValue: boolean
-// }>()
+ defineProps<{
+  modelValue: boolean
+}>()
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: boolean): void

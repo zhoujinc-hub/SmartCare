@@ -85,7 +85,7 @@ import type { AlertLog } from '@/types/alertType'
 import AlertOperate from './AlertOperate.vue'
 import { ElMessage } from 'element-plus'
 
-const props = defineProps<{
+ defineProps<{ //我把变量名删了，因为显示变量名没使用会报错
   alertList: AlertLog[]
   loading: boolean
   page: number
