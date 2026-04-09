@@ -114,6 +114,11 @@ Households
  * 请求参数：householdId
  * 返回格式：{ code: 200, message: '成功' }
 
+  * 7. 批量更新报警阈值
+ * 接口地址：/api/households/batch-update-threshold
+ * 请求方式：POST
+ * 请求参数：householdIds + alertThresholdSeconds
+ * 返回格式：{ code: 200, message: '成功' }
 
 Cameras
  * 1. 获取摄像头列表（分页+筛选）

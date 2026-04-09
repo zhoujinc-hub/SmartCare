@@ -6,6 +6,7 @@
     label-width="80px"
     class="login-form"
   >
+    <!-- 用户名 -->
     <el-form-item label="账号" prop="username">
       <el-input 
         v-model="form.username" 
@@ -15,6 +16,7 @@
       ></el-input>
     </el-form-item>
     
+    <!-- 密码 -->
     <el-form-item label="密码" prop="password">
       <el-input 
         v-model="form.password" 
@@ -25,6 +27,7 @@
       ></el-input>
     </el-form-item>
     
+    <!-- 用户类型选择 -->
     <el-form-item label="用户类型" prop="userType">
       <el-select 
         v-model="form.userType" 
@@ -36,11 +39,13 @@
       </el-select>
     </el-form-item>
     
+    <!-- 记住密码+忘记密码 -->
     <div class="login-form-actions">
       <el-checkbox v-model="form.rememberMe" label="记住密码" size="small"></el-checkbox>
       <el-button type="text" @click="onForgotPwd" size="small">忘记密码？</el-button>
     </div>
     
+    <!-- 登录按钮 -->
     <el-form-item>
       <el-button 
         type="primary" 
@@ -64,52 +69,63 @@ import type { LoginForm } from '@/types/user'
 import { userLogin } from '@/api/user'
 import { setToken, setUserInfo, setRememberUser, clearRememberUser } from '@/utils/auth'
 
+// Props
 const props = defineProps<{
-  initForm: LoginForm
+  initForm: LoginForm // 初始化表单数据
 }>()
 
+// Emits
 const emit = defineEmits<{
-  (e: 'login-success', userType: number): void
-  (e: 'forgot-pwd'): void
+  (e: 'login-Success', userType: number): void
+  (e: 'forgot-Pwd'): void
 }>()
 
+// 表单Ref
 const formRef = ref<FormInstance>()
+// 加载状态
 const loading = ref(false)
+// 登录表单
 const form = reactive<LoginForm>({
   ...props.initForm
 })
 
+// 表单校验规则
 const rules = reactive<FormRules>({
   username: [{ required: true, message: '请输入账号', trigger: 'blur' }],
   password: [{ required: true, message: '请输入密码', trigger: 'blur' }, { min: 6, max: 20, message: '密码长度6-20位', trigger: 'blur' }],
   userType: [{ required: true, message: '请选择用户类型', trigger: 'change' }]
 })
 
+// 登录处理
 const onLogin = async () => {
   try {
     if (!formRef.value) return
     await formRef.value.validate()
 
     loading.value = true
+    // 调用登录接口
     const res = await userLogin(form)
     
-    if (res.data.code === 200 && res.data.data?.token) {
-      if (res.data.data.status === 0) {
+    if (res.code === 200 && res.data.token) {
+      // 校验用户状态
+      if (res.data.status === 0) {
         ElMessage.error('账号已被禁用，请联系管理员')
         loading.value = false
         return
       }
 
-      setToken(res.data.data.token)
+      // 存储登录态
+      setToken(res.data.token)
       setUserInfo({
-        userId: res.data.data.userId,
-        username: res.data.data.username,
-        realName: res.data.data.realName,
-        phone: res.data.data.phone,
-        userType: res.data.data.userType,
-        status: res.data.data.status
+        userId: res.data.userId,
+        username: res.data.username,
+        realName: res.data.realName,
+        phone: res.data.phone,
+        userType: res.data.userType,
+        status: res.data.status
       })
 
+      // 记住密码
       if (form.rememberMe) {
         setRememberUser(form.username, form.userType)
       } else {
@@ -117,9 +133,9 @@ const onLogin = async () => {
       }
 
       ElMessage.success('登录成功，正在跳转...')
-      emit('login-success', form.userType)
+      emit('login-Success', form.userType)
     } else {
-      ElMessage.error(res.data.message || '登录失败，请检查账号密码')
+      ElMessage.error(res.message || '登录失败，请检查账号密码')
     }
   } catch (error) {
     console.error('登录接口调用异常：', error)
@@ -129,10 +145,12 @@ const onLogin = async () => {
   }
 }
 
+// 忘记密码
 const onForgotPwd = () => {
-  emit('forgot-pwd')
+  emit('forgot-Pwd')
 }
 
+// 暴露表单重置方法
 defineExpose({
   resetForm: () => {
     if (formRef.value) {

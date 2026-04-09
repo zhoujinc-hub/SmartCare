@@ -1,150 +1,304 @@
 <template>
-  <div class="elder-management-container">
-    <div class="search-bar">
-      <el-input
-        v-model="query.name"
-        placeholder="输入老人姓名搜索"
-        style="width: 260px"
-        clearable
-        @keyup.enter="getList"
-      />
-      <el-button type="primary" @click="getList" style="margin-left: 8px">
-        <el-icon><Search /></el-icon> 查询
-      </el-button>
-      <el-button type="success" @click="openAdd" style="margin-left: 8px">
-        <el-icon><Plus /></el-icon> 新增老人
-      </el-button>
-      <el-button @click="resetQuery" style="margin-left: 8px">重置</el-button>
+  <div class="elders-container">
+    <!-- 页面标题+筛选栏 -->
+    <div class="page-header">
+      <h2>老人信息管理</h2>
+      <el-row class="search-bar" align="middle">
+        <el-col :span="6">
+          <el-input v-model="filterParams.name" placeholder="输入老人姓名搜索" clearable />
+        </el-col>
+        <el-col :span="5">
+          <el-select v-model="filterParams.communityId" placeholder="选择所属社区" clearable disabled>
+            <el-option label="幸福社区" :value="1" />
+            <el-option label="阳光社区" :value="2" />
+            <el-option label="和谐社区" :value="3" />
+          </el-select>
+        </el-col>
+        <el-col :span="6">
+          <el-select v-model="filterParams.healthStatus" placeholder="选择健康状态" clearable disabled>
+            <el-option label="健康" :value="1" />
+            <el-option label="需关注" :value="2" />
+            <el-option label="需监护" :value="3" />
+          </el-select>
+        </el-col>
+        <el-col :span="7" class="search-buttons">
+          <el-button type="primary" :icon="Search" @click="handleQuery">查询</el-button>
+          <el-button type="success" :icon="Plus" @click="openAddForm">新增老人</el-button>
+          <el-button @click="resetQuery">重置</el-button>
+        </el-col>
+      </el-row>
     </div>
 
-    <el-table
-      :data="elderList"
-      border
-      stripe
-      v-loading="loading"
-      style="width:100%;margin-top:16px"
-    >
-      <el-table-column label="ID" prop="elder_id" width="100" />
-      <el-table-column label="姓名" prop="name" width="120" />
-      <el-table-column label="性别" width="80">
-        <template #default="{ row }">
-          {{ row.gender === 1 ? '男' : '女' }}
-        </template>
-      </el-table-column>
-      <el-table-column label="年龄" prop="age" width="80" />
-      <el-table-column label="家庭住址" prop="address" min-width="180" />
-
-      <el-table-column label="联系人1" prop="family_contact1" width="120" />
-      <el-table-column label="电话1" prop="family_phone1" width="140" />
-      <el-table-column label="联系人2" prop="family_contact2" width="120" />
-      <el-table-column label="电话2" prop="family_phone2" width="140" />
-
-      <el-table-column label="身体条件备注" min-width="200">
-        <template #default="{ row }">
-          <el-tooltip :content="row.physical_notes || '无'" placement="top">
-            <span class="text-ellipsis">{{ row.physical_notes || '无' }}</span>
-          </el-tooltip>
-        </template>
-      </el-table-column>
-
-      <el-table-column label="创建时间" prop="created_at" width="180" />
-
-      <el-table-column label="操作" width="220" fixed="right">
-        <template #default="{ row }">
-          <el-button size="small" type="primary" @click="openDetail(row)">查看</el-button>
-          <el-button size="small" type="warning" @click="openEdit(row)">编辑</el-button>
-          <el-button size="small" type="danger" @click="del(row)">删除</el-button>
-        </template>
-      </el-table-column>
-    </el-table>
-
-    <ElderForm
-      v-model="dialogVisible"
-      :elder-id="currentId"
-      @success="getList"
+    <!-- 老人列表表格组件 -->
+    <ElderTable
+      :elder-list="elderList"
+      :loading="loading"
+      :pagination="pagination"
+      @viewDetail="handleViewDetail"
+      @editElder="handleEditElder"
+      @sizeChange="handleSizeChange"
+      @currentChange="handleCurrentChange"
+      @deleteSuccess="fetchElderList"
     />
-    <ElderDetail v-model="detailVisible" :data="detailData" />
+
+    <!-- 新增/编辑老人表单弹窗组件 -->
+    <ElderForm
+      v-model="formVisible"
+      :isEdit="isEdit"
+      :form-data="formData"
+      :relative-list="relativeList"
+      @submitSuccess="fetchElderList"
+    />
+
+    <!-- 老人详情弹窗组件 -->
+    <ElderDetail
+      v-model="detailVisible"
+      :detail-data="detailData"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue'
-import { ElMessage } from 'element-plus'
-import { Search, Plus } from '@element-plus/icons-vue'
-import ElderForm from "@/components/elders/ElderForm.vue";
-import ElderDetail from "@/components/elders/ElderDetail.vue";
-import { getElderList, deleteElder } from '@/api/elder'
-import type { ElderItem } from '@/types/elder'
+import { ref, reactive, onMounted } from 'vue';
+import { ElMessage } from 'element-plus';
+import { Search, Plus } from '@element-plus/icons-vue';
+// 导入组件
+import ElderTable from '@/components/elders/ElderTable.vue';
+import ElderForm from '@/components/elders/ElderForm.vue';
+import ElderDetail from '@/components/elders/ElderDetail.vue';
+// 导入类型
+import type { ElderItem, ElderFilterParams, PaginationParams, ElderFormData, ElderDetailItem } from '@/types/elder';
+import type { UserItem } from '@/types/user';
+// 导入接口
+import { getElderList, getElderDetail } from '@/api/elder';
+import { getRelativeList } from '@/api/user';
+// 导入工具函数
+import { formatRelativesText } from '@/utils/format';
 
-const loading = ref(false)
-const dialogVisible = ref(false)
-const detailVisible = ref(false)
-const currentId = ref(0)
-const elderList = ref<ElderItem[]>([])
-const detailData = ref<ElderItem>({} as ElderItem)
+// 加载状态
+const loading = ref(false);
+// 表单弹窗显隐
+const formVisible = ref(false);
+// 详情弹窗显隐
+const detailVisible = ref(false);
+// 老人列表数据
+const elderList = ref<ElderItem[]>([]);
+// 家属列表
+const relativeList = ref<UserItem[]>([]);
+// 筛选参数
+const filterParams = reactive<ElderFilterParams>({
+  name: '',
+  communityId: '',
+  healthStatus: ''
+});
+// 分页参数
+const pagination = reactive<PaginationParams>({
+  pageNum: 1,
+  pageSize: 10,
+  total: 0
+});
+// 是否为编辑模式
+const isEdit = ref(false);
+// 表单数据
+const formData = reactive<ElderFormData>({
+  elder_id: 0,
+  name: '',
+  gender: 0,
+  age: 0,
+  address: '',
+  health_notes: '',
+  relativeIds: []
+});
+// 详情数据
+const detailData = reactive<ElderDetailItem>({} as ElderDetailItem);
 
-const query = reactive({ name: '' })
-const pagination = reactive({ pageNum: 1, pageSize: 10 })
+// 页面挂载时加载数据
+onMounted(() => {
+  fetchElderList();
+  fetchRelativeList();
+});
 
-onMounted(() => getList())
-
-async function getList() {
-  loading.value = true
+/**
+ * 获取老人列表数据
+ */
+const fetchElderList = async () => {
+  loading.value = true;
   try {
     const res = await getElderList(
       { pageNum: pagination.pageNum, pageSize: pagination.pageSize },
-      { name: query.name }
-    )
-    elderList.value = res.data.list
+      filterParams
+    );
+
+    if (res.code === 200) {
+      // 拼接家属信息显示文本
+      elderList.value = res.data.list.map(item => ({
+        ...item,
+        relatives: formatRelativesText(item.relativeList)
+      }));
+      pagination.total = res.data.total;
+      pagination.pageNum = res.data.pageNum;
+      pagination.pageSize = res.data.pageSize;
+    } else {
+      ElMessage.error(res.message || '获取老人列表失败');
+    }
+  } catch (error) {
+    console.error('获取老人列表接口异常：', error);
+    ElMessage.error('网络异常，获取老人列表失败');
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
-function openAdd() {
-  currentId.value = 0
-  dialogVisible.value = true
-}
+/**
+ * 获取家属列表
+ */
+const fetchRelativeList = async () => {
+  try {
+    const res = await getRelativeList();
+    if (res.code === 200) {
+      relativeList.value = res.data;
+    } else {
+      ElMessage.error(res.message || '获取家属列表失败');
+    }
+  } catch (error) {
+    console.error('获取家属列表接口异常：', error);
+    ElMessage.error('网络异常，获取家属列表失败');
+  }
+};
 
-function openEdit(row: ElderItem) {
-  currentId.value = row.elder_id
-  dialogVisible.value = true
-}
+/**
+ * 查询按钮
+ */
+const handleQuery = () => {
+  pagination.pageNum = 1;
+  fetchElderList();
+};
 
-function openDetail(row: ElderItem) {
-  detailData.value = row
-  detailVisible.value = true
-}
+/**
+ * 重置筛选条件
+ */
+const resetQuery = () => {
+  filterParams.name = '';
+  filterParams.communityId = '';
+  filterParams.healthStatus = '';
+  pagination.pageNum = 1;
+  fetchElderList();
+};
 
-async function del(row: ElderItem) {
-  await deleteElder(row.elder_id)
-  ElMessage.success('删除成功')
-  getList()
-}
+/**
+ * 页码改变
+ */
+const handleCurrentChange = (val: number) => {
+  pagination.pageNum = val;
+  fetchElderList();
+};
 
-function resetQuery() {
-  query.name = ''
-  getList()
-}
+/**
+ * 页容量改变
+ */
+const handleSizeChange = (val: number) => {
+  pagination.pageSize = val;
+  pagination.pageNum = 1;
+  fetchElderList();
+};
+
+/**
+ * 打开新增表单
+ */
+const openAddForm = () => {
+  isEdit.value = false;
+  // 重置表单数据
+  Object.assign(formData, {
+    elder_id: 0,
+    name: '',
+    gender: 0,
+    age: 0,
+    address: '',
+    health_notes: '',
+    relativeIds: []
+  });
+  formVisible.value = true;
+};
+
+/**
+ * 打开编辑表单
+ */
+const handleEditElder = (row: ElderItem & { relativeIds: number[] }) => {
+  isEdit.value = true;
+  // 填充表单数据
+  Object.assign(formData, {
+    elder_id: row.elder_id,
+    name: row.name,
+    gender: row.gender,
+    age: row.age,
+    address: row.address,
+    health_notes: row.health_notes,
+    relativeIds: row.relativeIds
+  });
+  formVisible.value = true;
+};
+
+/**
+ * 查看详情
+ */
+const handleViewDetail = async (row: ElderItem) => {
+  const res = await getElderDetail(row.elder_id);
+  if (res.data) {
+    Object.assign(detailData, res.data);
+  } else {
+    Object.assign(detailData, {
+      ...row,
+      relativeList: row.relativeList || [],
+      relativeCount: row.relativeList?.length || 0
+    });
+  }
+  detailVisible.value = true;
+};
 </script>
 
 <style scoped>
-.elder-management-container { padding: 4px; }
-.search-bar { padding: 16px; background: #fff; border-radius: 8px; margin-bottom: 16px; }
-.text-ellipsis {
-  display: inline-block;
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.elders-container {
+  width: 100%;
+  min-height: calc(100vh - 20px);
+  padding: 0;
+  color: #333333;
+  background-color: #f9f9f9;
 }
 
-:deep(.el-table__header .el-table__cell) {
-  color: #1f2937 !important; 
-  font-weight: 600; 
+.page-header {
+  padding: 20px;
 }
 
-:deep(.el-table__empty-text) {
-  color: #6b7280 !important;
+.page-header h2 {
+  margin: 0 0 16px 0;
+  font-size: 20px;
+  color: #1f2937;
+  font-weight: 600;
+}
+
+.search-bar {
+  width: 100%;
+  padding: 16px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  border: 1px solid #e6e6e6;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.search-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+:deep(.el-input__inner) {
+  background-color: #ffffff;
+  border-color: #e6e6e6;
+  color: #333333;
+}
+
+:deep(.el-select .el-input__inner) {
+  background-color: #ffffff;
+  border-color: #e6e6e6;
+  color: #333333;
 }
 </style>

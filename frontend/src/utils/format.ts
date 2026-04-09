@@ -7,58 +7,28 @@ export const formatPercent = (value: number): string => {
   return `${(value * 100).toFixed(0)}%`;
 };
 
-import dayjs from 'dayjs';
+/**
+ * 格式化告警类型文本
+ * @param cameraType 摄像头类型（0:家庭 1:社区）
+ * @returns 告警类型文本
+ */
+export const formatAlertType = (cameraType: number): string => {
+  return cameraType === 0 ? '家庭摔倒' : '社区摔倒';
+};
 
 /**
- * 格式化发送状态文本
- * @param status 发送状态（0:失败 1:成功 2:发送中）
+ * 格式化处理状态文本
+ * @param status 处理状态（1:待处理 2:已处理 3:误报）
+ * @returns 状态文本
  */
-export function formatSendStatus(status: 0 | 1 | 2): string {
-  const map = {
-    0: '失败',
-    1: '成功',
-    2: '发送中'
-  };
-  return map[status] || '未知';
-}
-
-/**
- * 格式化发送方式文本
- * @param method 发送方式（1:短信 2:APP推送 3:电话）
- */
-export function formatSendMethod(method: 1 | 2 | 3): string {
-  const map = {
-    1: '短信',
-    2: 'APP推送',
-    3: '电话'
-  };
-  return map[method] || '未知';
-}
-
-/**
- * 格式化接收人类型文本
- * @param type 接收人类型（1:家属 2:管理员）
- */
-export function formatRecipientType(type: 1 | 2): string {
-  const map = {
-    1: '家属',
-    2: '管理员'
-  };
-  return map[type] || '未知';
-}
-
-/**
- * 格式化摔倒事件状态
- * @param status 状态（1:待处理 2:已处理 3:误报）
- */
-export function formatFallStatus(status: 1 | 2 | 3): string {
-  const map = {
-    1: '待处理',
-    2: '已处理',
-    3: '误报'
-  };
-  return map[status] || '未知';
-}
+export const formatHandleStatus = (status: number): string => {
+  switch (status) {
+    case 1: return '待处理';
+    case 2: return '已处理';
+    case 3: return '误报';
+    default: return '未知';
+  }
+};
 
 /**
  * 格式化通知状态文本
