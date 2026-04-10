@@ -3,6 +3,8 @@ package com.smartcare.controller;
 import com.smartcare.common.Result;
 import com.smartcare.common.ResultCodeEnum;
 import com.smartcare.dto.elder.ElderQueryDto;
+import com.smartcare.dto.elder.ElderSaveDto;
+import com.smartcare.dto.elder.ElderUpdateDto;
 import com.smartcare.entity.Elders;
 import com.smartcare.service.impl.EldersServiceImpl;
 import com.smartcare.vo.Page.PageVo;
@@ -28,4 +30,30 @@ public class EldersController {
             return Result.build(null, ResultCodeEnum.FAIL);
         }
     }
+    @PostMapping("/add")
+    public Result<Void> add(@RequestBody ElderSaveDto dto) {
+        try {
+            if (dto.getName() == null || dto.getName().trim().isEmpty()) {
+                return Result.build(null, ResultCodeEnum.ELDER_NAME_EMPTY);
+            }
+            eldersService.add(dto);
+            return Result.ok();
+        } catch (Exception e) {
+            return Result.build(null, ResultCodeEnum.ELDER_SAVE_ERROR);
+        }
+    }
+
+    @PutMapping("/update")
+    public Result<Void> update(@RequestBody ElderUpdateDto dto) {
+        try {
+            eldersService.update(dto);
+            return Result.build(null, ResultCodeEnum.SUCCESS);
+        } catch (RuntimeException e) {
+            if ("老人不存在".equals(e.getMessage())) {
+                return Result.build(null, ResultCodeEnum.ELDER_NOT_EXIST);
+            }
+            return Result.build(null, ResultCodeEnum.ELDER_UPDATE_ERROR);
+        }
+    }
+
 }

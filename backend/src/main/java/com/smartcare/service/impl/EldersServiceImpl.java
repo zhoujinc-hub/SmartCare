@@ -4,6 +4,7 @@ package com.smartcare.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.smartcare.dto.elder.ElderQueryDto;
+import com.smartcare.dto.elder.ElderRelativeDto;
 import com.smartcare.dto.elder.ElderSaveDto;
 import com.smartcare.dto.elder.ElderUpdateDto;
 import com.smartcare.entity.Elders;
@@ -55,18 +56,59 @@ public class EldersServiceImpl implements EldersService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void add(ElderSaveDto dto) {
+        Elders elder = new Elders();
+        BeanUtils.copyProperties(dto, elder);
+        eldersMapper.insert(elder);
 
+        if (dto.getRelatives() != null && !dto.getRelatives().isEmpty()) {
+            for (ElderRelativeDto relativeDto : dto.getRelatives()) {
+                Relations relation = new Relations();
+                relation.setElderId(elder.getElderId());
+                relation.setUserId(relativeDto.getUserId());
+                relation.setRelationship(relativeDto.getRelationship());
+                relationsMapper.insert(relation);
+            }
+        }
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void update(ElderUpdateDto dto) {
-
+        Elders elder = eldersMapper.selectById(dto.getElderId());
+        if (elder == null) {
+            return;
+        }
+        BeanUtils.copyProperties(dto, elder);
+        eldersMapper.updateById(elder);
+        relationsMapper.delete(
+                new LambdaQueryWrapper<Relations>()
+                        .eq(Relations::getElderId, dto.getElderId())
+        );
+        if (dto.getRelatives() != null && !dto.getRelatives().isEmpty()) {
+            for (ElderRelativeDto relativeDto : dto.getRelatives()) {
+                Relations relation = new Relations();
+                relation.setElderId(dto.getElderId());
+                relation.setUserId(relativeDto.getUserId());
+                relation.setRelationship(relativeDto.getRelationship());
+                relationsMapper.insert(relation);
+            }
+        }
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void delete(Long elderId) {
-
+        Elders elder = eldersMapper.selectById(elderId);
+        if (elder == null) {
+            throw new RuntimeException("老人不存在");
+        }
+        relationsMapper.delete(
+                new LambdaQueryWrapper<Relations>()
+                        .eq(Relations::getElderId, elderId)
+        );
+        eldersMapper.deleteById(elderId);
     }
 
     @Override

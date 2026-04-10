@@ -12,5 +12,5 @@ public class ElderUpdateDto {
     private Byte gender;
     private String address;
     private String healthNotes;
-    private List<Long> relativeIds;
+    private List<ElderRelativeDto> relatives;
 }
