@@ -51,7 +51,6 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { Search, Plus } from '@element-plus/icons-vue'
 import ElderForm from './ElderForm.vue'
 import ElderDetail from './ElderDetail.vue'
 import { getElderList, deleteElder } from '@/api/elder'
@@ -82,10 +81,10 @@ async function getList() {
   }
 }
 
-function openAdd() {
-  currentId.value = 0
-  dialogVisible.value = true
-}
+// function openAdd() {
+//   currentId.value = 0
+//   dialogVisible.value = true
+// }
 
 function openEdit(row: ElderItem) {
   currentId.value = row.elder_id
@@ -103,10 +102,10 @@ async function del(row: ElderItem) {
   getList()
 }
 
-function resetQuery() {
-  query.name = ''
-  getList()
-}
+// function resetQuery() {
+//   query.name = ''
+//   getList()
+// }
 </script>
 
 <style scoped>
