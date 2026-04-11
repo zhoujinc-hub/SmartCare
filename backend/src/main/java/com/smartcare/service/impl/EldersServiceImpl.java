@@ -77,15 +77,18 @@ public class EldersServiceImpl implements EldersService {
     @Transactional(rollbackFor = Exception.class)
     public void update(ElderUpdateDto dto) {
         Elders elder = eldersMapper.selectById(dto.getElderId());
+
         if (elder == null) {
-            return;
+            throw new RuntimeException("老人不存在");
         }
+
         BeanUtils.copyProperties(dto, elder);
         eldersMapper.updateById(elder);
         relationsMapper.delete(
                 new LambdaQueryWrapper<Relations>()
                         .eq(Relations::getElderId, dto.getElderId())
         );
+
         if (dto.getRelatives() != null && !dto.getRelatives().isEmpty()) {
             for (ElderRelativeDto relativeDto : dto.getRelatives()) {
                 Relations relation = new Relations();
@@ -113,7 +116,29 @@ public class EldersServiceImpl implements EldersService {
 
     @Override
     public ElderDetailVo detail(Long elderId) {
-        return null;
-    }
+        Elders elder = eldersMapper.selectById(elderId);
 
+        if (elder == null) {
+            throw new RuntimeException("老人不存在");
+        }
+
+        ElderDetailVo detailVo = new ElderDetailVo();
+        BeanUtils.copyProperties(elder, detailVo);
+
+        List<Relations> relations = relationsMapper.selectList(
+                new LambdaQueryWrapper<Relations>()
+                        .eq(Relations::getElderId, elderId)
+        );
+
+        List<ElderRelativeDto> relatives = new ArrayList<>();
+        for (Relations relation : relations) {
+            ElderRelativeDto dto = new ElderRelativeDto();
+            dto.setUserId(relation.getUserId());
+            dto.setRelationship(relation.getRelationship());
+            relatives.add(dto);
+        }
+
+        detailVo.setRelatives(relatives);
+        return detailVo;
+    }
 }
