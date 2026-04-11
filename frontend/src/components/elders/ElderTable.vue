@@ -1,203 +1,130 @@
 <template>
-  <div class="elder-table-container">
-    <!-- 老人信息表格 -->
+  <div class="elder-management-container">
     <el-table
       :data="elderList"
       border
       stripe
       v-loading="loading"
-      element-loading-text="加载中..."
-      style="width: 100%; margin-top: 16px"
-      size="default"
-      :header-cell-style="{ backgroundColor: '#f8f9fa', color: '#1f2937' }"
-      :cell-style="{ backgroundColor: '#ffffff', color: '#333333' }"
+      style="width:100%;margin-top:16px"
     >
-      <el-table-column type="index" label="序号" align="center" width="80" />
-      <el-table-column prop="elder_id" label="老人ID" align="center" width="100" />
-      <el-table-column prop="name" label="姓名" align="center" width="100" />
-      <el-table-column label="性别" align="center" width="80">
-        <template #default="scope">
-          <el-tag type="info" effect="light">{{ formatGender(scope.row.gender) }}</el-tag>
+      <el-table-column label="ID" prop="elder_id" width="100" />
+      <el-table-column label="姓名" prop="name" width="120" />
+      <el-table-column label="性别" width="80">
+        <template #default="{ row }">
+          {{ row.gender === 1 ? '男' : '女' }}
         </template>
       </el-table-column>
-      <el-table-column prop="age" label="年龄" align="center" width="80" />
-      <el-table-column prop="address" label="家庭地址" align="center" />
-      <el-table-column prop="health_notes" label="健康备注" align="center" show-overflow-tooltip>
-        <template #default="scope">
-          <span>{{ scope.row.health_notes || '无' }}</span>
+      <el-table-column label="年龄" prop="age" width="80" />
+      <el-table-column label="家庭住址" prop="address" min-width="180" />
+      <el-table-column label="联系人1" prop="family_contact1" width="120" />
+      <el-table-column label="电话1" prop="family_phone1" width="140" />
+      <el-table-column label="联系人2" prop="family_contact2" width="120" />
+      <el-table-column label="电话2" prop="family_phone2" width="140" />
+      <el-table-column label="身体条件备注" min-width="200">
+        <template #default="{ row }">
+          <el-tooltip :content="row.physical_notes || '无'" placement="top">
+            <span class="text-ellipsis">{{ row.physical_notes || '无' }}</span>
+          </el-tooltip>
         </template>
       </el-table-column>
-      <el-table-column label="家属信息" align="center" width="180">
-        <template #default="scope">
-          <span>{{ scope.row.relatives || '暂无' }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column prop="created_at" label="创建时间" align="center" width="180">
-        <template #default="scope">
-          <span>{{ formatTime(scope.row.created_at) }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="操作" align="center" width="200" fixed="right">
-        <template #default="scope">
-          <div class="action-buttons">
-            <el-button size="small" type="primary" :icon="View" @click="handleViewDetail(scope.row)">查看</el-button>
-            <el-button size="small" type="warning" :icon="Edit" @click="handleEditElder(scope.row)">编辑</el-button>
-            <el-button size="small" type="danger" :icon="Delete" @click="handleDeleteElder(scope.row)">删除</el-button>
-          </div>
+
+      <el-table-column label="创建时间" prop="created_at" width="180" />
+
+      <el-table-column label="操作" width="220" fixed="right">
+        <template #default="{ row }">
+          <el-button size="small" type="primary" @click="openDetail(row)">查看</el-button>
+          <el-button size="small" type="warning" @click="openEdit(row)">编辑</el-button>
+          <el-button size="small" type="danger" @click="del(row)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
 
-    <!-- 分页器 -->
-    <el-pagination
-      @size-change="handleSizeChange"
-      @current-change="handleCurrentChange"
-      :current-page="pagination.pageNum"
-      :page-sizes="[10, 20, 50, 100]"
-      :page-size="pagination.pageSize"
-      layout="total, sizes, prev, pager, next, jumper"
-      :total="pagination.total"
-      style="margin-top: 20px; text-align: right"
-    >
-    </el-pagination>
+    <elder-form
+      v-model="dialogVisible"
+      :elder-id="currentId"
+      @success="getList"
+    />
+    <elder-detail v-model="detailVisible" :data="detailData" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ElMessage, ElMessageBox } from 'element-plus';
-import { View, Edit, Delete } from '@element-plus/icons-vue';
-import type { ElderItem, PaginationParams } from '@/types/elder';
-import { deleteElder, getElderRelations } from '@/api/elder';
-import { formatTime, formatGender } from '@/utils/format';
+import { ref, reactive, onMounted } from 'vue'
+import { ElMessage } from 'element-plus'
+import ElderForm from './ElderForm.vue'
+import ElderDetail from './ElderDetail.vue'
+import { getElderList, deleteElder } from '@/api/elder'
+import type { ElderItem } from '@/types/elder'
 
-// Props
-const props = defineProps<{
-  elderList: ElderItem[];
-  loading: boolean;
-  pagination: PaginationParams;
-}>();
+const loading = ref(false)
+const dialogVisible = ref(false)
+const detailVisible = ref(false)
+const currentId = ref(0)
+const elderList = ref<ElderItem[]>([])
+const detailData = ref<ElderItem>({} as ElderItem)
 
-// Emits
-const emit = defineEmits<{
-  (e: 'viewDetail', row: ElderItem): void;
-  (e: 'editElder', row: ElderItem & { relativeIds: number[] }): void;
-  (e: 'sizeChange', val: number): void;
-  (e: 'currentChange', val: number): void;
-  (e: 'deleteSuccess'): void;
-}>();
+const query = reactive({ name: '' })
+const pagination = reactive({ pageNum: 1, pageSize: 10 })
 
-// 查看详情
-const handleViewDetail = (row: ElderItem) => {
-  emit('viewDetail', row);
-};
+onMounted(() => getList())
 
-// 编辑老人
-const handleEditElder = async (row: ElderItem) => {
-  // 获取关联的家属ID列表
-  const res = await getElderRelations(row.elder_id);
-  const relativeIds = res.data?.map((rel: any) => rel.user_id) || [];
-  
-  emit('editElder', {
-    ...row,
-    relativeIds
-  });
-};
+async function getList() {
+  loading.value = true
+  try {
+    const res = await getElderList(
+      { pageNum: pagination.pageNum, pageSize: pagination.pageSize },
+      { name: query.name }
+    )
+    elderList.value = res.data.list
+  } finally {
+    loading.value = false
+  }
+}
 
-// 删除老人
-const handleDeleteElder = async (row: ElderItem) => {
-  ElMessageBox.confirm(
-    '确定要删除该老人信息吗？删除后会同时删除关联的家属关系，且不可恢复！',
-    '警告',
-    {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning'
-    }
-  ).then(async () => {
-    const res = await deleteElder(row.elder_id);
-    if (res.code === 200) {
-      ElMessage.success('删除老人信息成功');
-      emit('deleteSuccess');
-    } else {
-      ElMessage.error(res.message || '删除老人信息失败');
-    }
-  }).catch(() => {
-    ElMessage.info('已取消删除');
-  });
-};
+// function openAdd() {
+//   currentId.value = 0
+//   dialogVisible.value = true
+// }
 
-// 页码改变
-const handleCurrentChange = (val: number) => {
-  emit('currentChange', val);
-};
+function openEdit(row: ElderItem) {
+  currentId.value = row.elder_id
+  dialogVisible.value = true
+}
 
-// 页容量改变
-const handleSizeChange = (val: number) => {
-  emit('sizeChange', val);
-};
+function openDetail(row: ElderItem) {
+  detailData.value = row
+  detailVisible.value = true
+}
 
-// 暴露格式化函数
-defineExpose({
-  formatTime,
-  formatGender
-});
+async function del(row: ElderItem) {
+  await deleteElder(row.elder_id)
+  ElMessage.success('删除成功')
+  getList()
+}
+
+// function resetQuery() {
+//   query.name = ''
+//   getList()
+// }
 </script>
 
 <style scoped>
-.elder-table-container {
-  width: 100%;
+.elder-management-container { padding: 4px; }
+.search-bar { padding: 16px; background: #fff; border-radius: 8px; margin-bottom: 16px; }
+.text-ellipsis {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-:deep(.el-table) {
-  --el-table-bg-color: #ffffff;
-  --el-table-text-color: #333333;
-  --el-table-header-text-color: #1f2937;
-  --el-table-row-hover-bg-color: #f0f9ff;
-  --el-table-border-color: #e6e6e6;
-  --el-table-stripe-bg-color: #fafafa;
+:deep(.el-table__header .el-table__cell) {
+  color: #1f2937 !important; 
+  font-weight: 600; 
 }
 
-:deep(.el-table--border::after),
-:deep(.el-table--group::after),
-:deep(.el-table::before) {
-  background-color: #e6e6e6;
-}
-
-:deep(.el-table__cell) {
-  border-color: #e6e6e6 !important;
-}
-
-:deep(.el-table .el-table__header-wrapper .el-table__cell > .cell) {
-  font-weight: 600;
-}
-
-:deep(.el-pagination) {
-  --el-pagination-text-color: #333333;
-  --el-pagination-button-color: #333333;
-  --el-pagination-button-bg-color: #ffffff;
-  --el-pagination-button-hover-bg-color: #f0f0f0;
-  --el-pagination-button-active-bg-color: #409eff;
-  --el-pagination-button-active-color: #ffffff;
-}
-
-.action-buttons {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  justify-content: center;
-}
-
-.action-buttons .el-button {
-  justify-content: center;
-  padding: 6px 10px;
-  font-size: 12px;
-  min-width: auto;
-  border-radius: 4px;
-}
-
-:deep(.el-tag) {
-  font-size: 12px;
-  padding: 2px 8px;
-  border-radius: 4px;
+:deep(.el-table__empty-text) {
+  color: #6b7280 !important;
 }
 </style>

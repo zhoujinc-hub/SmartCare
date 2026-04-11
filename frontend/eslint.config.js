@@ -43,7 +43,8 @@ export default [
       'no-console': 'off',        // 允许 console 打印
       'vue/attributes-order': 'off', // 关闭属性顺序警告
       'vue/max-attributes-per-line': 'off', // 关闭属性换行警告
-      'vue/html-self-closing': 'off' // 关闭组件自闭合警告
+      'vue/html-self-closing': 'off', // 关闭组件自闭合警告
+        'vue/no-unused-properties': 'off'
     }
   },
   {
