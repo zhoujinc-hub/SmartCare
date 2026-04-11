@@ -5,7 +5,6 @@ import type {
   HouseholdFilterParams 
 } from '../types/household';
 
-
 // 本地定义分页（无外部依赖）
 interface PaginationParams {
   pageNum: number;
