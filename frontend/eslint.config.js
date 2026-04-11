@@ -44,7 +44,9 @@ export default [
       'vue/attributes-order': 'off', // 关闭属性顺序警告
       'vue/max-attributes-per-line': 'off', // 关闭属性换行警告
       'vue/html-self-closing': 'off', // 关闭组件自闭合警告
-        'vue/no-unused-properties': 'off'
+      'vue/no-unused-vars': 'off',      // 模板中未使用变量
+      'vue/no-unused-properties': 'off' // 未使用的 props/data（如果不需要可以删除）
+
     }
   },
   {
