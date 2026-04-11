@@ -10,8 +10,7 @@
       "@/*": ["src/*"]
     },
     "noUnusedLocals": false,
-    "noUnusedParameters": false,
-    "noUnusedImports": false
+    "noUnusedParameters": false
   },
   "files": [],
   "references": [
