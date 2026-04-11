@@ -1,12 +1,10 @@
 import request from '../utils/request';
 import type { 
-  AlertItem, 
-  AlertFilterParams, 
+  AlertFilterParams,
   PaginationParams, 
   AlertListResponse, 
   BaseResponse 
 } from '../types/fallEvent';
-
 
 /**
  * 获取告警列表（分页+筛选）

@@ -55,10 +55,10 @@ import type { CameraItem } from '@/types/camera';
 import { formatTime } from '@/utils/camera';
 
 // 修复：添加 eslint 注释忽略未使用变量警告（若需保留）
-defineProps<{
+const props = defineProps<{
   modelValue: boolean;
   detailData: CameraItem;
-}>();  
+}>(); // eslint-disable-line @typescript-eslint/no-unused-vars
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: boolean): void;
