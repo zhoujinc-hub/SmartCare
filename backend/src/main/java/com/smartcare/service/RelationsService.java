@@ -1,8 +1,10 @@
 package com.smartcare.service;
 
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.smartcare.entity.Relations;
-import com.smartcare.mapper.RelationsMapper;
+import com.smartcare.dto.relation.RelationQueryDto;
+import com.smartcare.vo.Page.PageVo;
+import com.smartcare.vo.relation.RelationVo;
 
-public class RelationsService extends ServiceImpl<RelationsMapper, Relations> {
+public interface RelationsService {
+
+    PageVo<RelationVo> list(RelationQueryDto dto);
 }

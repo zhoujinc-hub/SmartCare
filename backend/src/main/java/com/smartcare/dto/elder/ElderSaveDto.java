@@ -1,5 +1,6 @@
 package com.smartcare.dto.elder;
 
+import com.smartcare.dto.elder.ElderRelativeDto;
 import lombok.Data;
 
 import java.util.List;
@@ -11,5 +12,5 @@ public class ElderSaveDto {
     private Byte gender;
     private String address;
     private String healthNotes;
-    private List<Long> relativeIds;
+    private List<ElderRelativeDto> relatives;
 }
