@@ -10,4 +10,5 @@ public class LoginVo {
     private String phone;
     private Byte userType;
     private Byte status;
+    private String token;
 }

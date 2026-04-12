@@ -2,6 +2,7 @@ package com.smartcare.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.smartcare.common.UserContext;
 import com.smartcare.dto.fall.FallEventHandleDto;
 import com.smartcare.dto.fall.FallEventNotesDto;
 import com.smartcare.dto.fall.FallEventQueryDto;
@@ -13,7 +14,9 @@ import com.smartcare.vo.fall.FallEventVo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 @Service
@@ -21,6 +24,7 @@ import java.util.List;
 public class FallEventsServiceImpl implements FallEventsService {
 
     private final FallEventsMapper fallEventsMapper;
+    private static final byte STATUS_HANDLED = 2;
 
     @Override
     public PageVo<FallEventVo> list(FallEventQueryDto dto) {
@@ -57,18 +61,58 @@ public class FallEventsServiceImpl implements FallEventsService {
         return result;
     }
 
+
     @Override
     public FallEventVo detail(Long eventId) {
-        return null;
+        FallEvents event = fallEventsMapper.selectById(eventId);
+
+        if (event == null) {
+            throw new RuntimeException("跌倒事件不存在");
+        }
+
+        FallEventVo vo = new FallEventVo();
+        BeanUtils.copyProperties(event, vo);
+        return vo;
     }
 
+
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void handle(Long eventId, FallEventHandleDto dto) {
 
+        FallEvents event = fallEventsMapper.selectById(eventId);
+
+        if (event == null) {
+            throw new RuntimeException("跌倒事件不存在");
+        }
+
+        if (event.getStatus() != null && event.getStatus() == 2) {
+            throw new RuntimeException("该告警已处理");
+        }
+
+        Long userId = UserContext.getUserId();
+
+        event.setStatus(STATUS_HANDLED);
+        event.setProcessedBy(userId);
+        event.setProcessedAt(LocalDateTime.now());
+
+        fallEventsMapper.updateById(event);
+
     }
 
+
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void saveNotes(Long eventId, FallEventNotesDto dto) {
 
+        FallEvents event = fallEventsMapper.selectById(eventId);
+
+        if (event == null) {
+            throw new RuntimeException("跌倒事件不存在");
+        }
+
+        event.setProcessNotes(dto.getProcessNotes());
+
+        fallEventsMapper.updateById(event);
     }
 }

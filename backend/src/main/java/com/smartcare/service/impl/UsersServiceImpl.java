@@ -41,6 +41,8 @@ public class UsersServiceImpl implements UsersService {
         //此处为封装成前端需要的信息返回给前端
         LoginVo vo = new LoginVo();
         BeanUtils.copyProperties(user, vo);
+        String token = "token_" + user.getUserId();
+        vo.setToken(token);
         return vo;
     }
     @Override
