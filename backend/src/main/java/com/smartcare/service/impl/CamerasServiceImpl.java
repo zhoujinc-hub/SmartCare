@@ -3,6 +3,8 @@ package com.smartcare.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.smartcare.dto.camera.CameraQueryDto;
+import com.smartcare.dto.camera.CameraSaveDto;
+import com.smartcare.dto.camera.CameraUpdateDto;
 import com.smartcare.entity.Cameras;
 import com.smartcare.mapper.CamerasMapper;
 import com.smartcare.service.CamerasService;
@@ -51,5 +53,61 @@ public class CamerasServiceImpl implements CamerasService {
         result.setPageSize(cameraPage.getSize());
         result.setRecords(voList);
         return result;
+    }
+    @Override
+    public void add(CameraSaveDto dto) {
+        Cameras camera = new Cameras();
+        BeanUtils.copyProperties(dto, camera);
+        camerasMapper.insert(camera);
+    }
+
+    @Override
+    public void update(CameraUpdateDto dto) {
+        Cameras camera = camerasMapper.selectById(dto.getCameraId());
+
+        if (camera == null) {
+            throw new RuntimeException("摄像头不存在");
+        }
+
+        BeanUtils.copyProperties(dto, camera);
+        camerasMapper.updateById(camera);
+    }
+
+    @Override
+    public void delete(Long cameraId) {
+        Cameras camera = camerasMapper.selectById(cameraId);
+
+        if (camera == null) {
+            throw new RuntimeException("摄像头不存在");
+        }
+
+        camerasMapper.deleteById(cameraId);
+    }
+
+    @Override
+    public CameraVo detail(Long cameraId) {
+        Cameras camera = camerasMapper.selectById(cameraId);
+
+        if (camera == null) {
+            throw new RuntimeException("摄像头不存在");
+        }
+
+        CameraVo vo = new CameraVo();
+        BeanUtils.copyProperties(camera, vo);
+        return vo;
+    }
+
+    @Override
+    public void refreshStatus() {
+        List<Cameras> list = camerasMapper.selectList(null);
+
+        for (Cameras camera : list) {
+            if (camera.getStatus() == null || camera.getStatus() == 0) {
+                camera.setStatus((byte) 1);
+            } else {
+                camera.setStatus((byte) 0);
+            }
+            camerasMapper.updateById(camera);
+        }
     }
 }
