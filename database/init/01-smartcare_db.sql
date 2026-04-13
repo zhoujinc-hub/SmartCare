@@ -1,3 +1,20 @@
+-- 1. 创建数据库（如果不存在）
+CREATE DATABASE IF NOT EXISTS smartcare_db
+    DEFAULT CHARACTER SET utf8mb4
+    COLLATE utf8mb4_unicode_ci;
+
+-- 2. 使用数据库
+USE smartcare_db;
+
+-- 3. 创建应用用户（匹配你后端的配置）
+CREATE USER IF NOT EXISTS 'smartcare_admin'@'%' IDENTIFIED BY 'password';
+
+-- 4. 授权（允许远程连接）
+GRANT ALL PRIVILEGES ON smartcare_db.* TO 'smartcare_admin'@'%';
+
+-- 5. 刷新权限
+FLUSH PRIVILEGES;
+
 -- MySQL dump 10.13  Distrib 8.0.41, for Win64 (x86_64)
 --
 -- Host: 127.0.0.1    Database: smartcare_db
