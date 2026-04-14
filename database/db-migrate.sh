@@ -1,8 +1,8 @@
 #!/bin/bash
 CONTAINER="smartcare-db"
-DB_NAME="smartcare_db"
-DB_USER="root"
-DB_PASS="root"
+DB_NAME: ${DB_NAME}
+DB_USER: ${DB_USER}
+DB_PASSWORD: ${DB_PASSWORD}
 
 echo "🔄 执行数据库更新..."
 
