@@ -9,6 +9,7 @@ class Camera:
             raise Exception("Camera not opened")
 
     def read(self):
+        # 是否读取成功,图像数组
         ret, frame = self.cap.read()
         return ret, frame
 
