@@ -1,18 +1,17 @@
 import { ref } from "vue"
-import { getAlerts } from "@/api/alerts"
-import type {Alert} from "@/types/alert";
+import { getAlertList } from "@/api/alertApi"
+import type { AlertLog } from "@/types/alertType"
 
 export function useAlerts() {
+  const alerts = ref<AlertLog[]>([])
 
-    const alerts = ref<Alert[]>([])
+  const loadAlerts = async () => {
+    const res = await getAlertList({ page: 1, size: 100 })
+    alerts.value = res.data?.list || []   // 这里修复！
+  }
 
-    const loadAlerts = async () => {
-        const res = await getAlerts()
-        alerts.value = res.data.data
-    }
-
-    return {
-        alerts,
-        loadAlerts
-    }
+  return {
+    alerts,
+    loadAlerts
+  }
 }
