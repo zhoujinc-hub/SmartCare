@@ -8,10 +8,10 @@ SmartCare 采用模块化架构，分离 AI 处理、后端服务、数据库和
 1. AI 识别服务（Python）
 2. 事件服务 API（Java / Spring Boot）
 3. 数据库（MySQL）
-4. Web 管理平台（vue前端）
+4. Web 管理平台（前端）
 
 ## 架构流程
-摄像头 -> AI 识别 -> 事件 API（Spring Boot） -> 数据库 -> Web前端
+摄像头 -> AI 识别 -> 事件 API（Spring Boot） -> 数据库 -> Web 仪表盘
 
 ## 职责
 
