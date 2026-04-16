@@ -35,7 +35,7 @@ for file in ./migrations/*.sql; do
         echo "📄 执行: $filename"
 
         docker cp "$file" $CONTAINER:/tmp/
-        docker exec -i $CONTAINER mysql -u"$DB_USER" -p"$DB_PASSWORD" "$DB_NAME" < "$file"
+        docker exec -i $CONTAINER mysql -u"$DB_USER" -p"$DB_PASSWORD" "$DB_NAME" < "$file" -e "SET NAMES utf8mb4;"
 
         if [ $? -eq 0 ]; then
             echo "✅ $filename 成功"
