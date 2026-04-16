@@ -5,6 +5,12 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
       MYSQL_DATABASE: ${DB_NAME}
+      # 添加字符集环境变量
+      MYSQL_CHARSET: utf8mb4
+      MYSQL_COLLATION: utf8mb4_unicode_ci
+    command: >
+     --character-set-server=utf8mb4
+     --collation-server=utf8mb4_unicode_ci
     ports:
       - "3306:3306"
     volumes:
@@ -16,7 +22,7 @@ services:
 
       # 3. 备用：随时手动挂载更新文件
       - ./database/migrations:/migrations
-    command: --default-authentication-plugin=mysql_native_password
+
 
   backend:
     build: ./backend
