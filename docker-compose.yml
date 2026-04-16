@@ -12,10 +12,10 @@ services:
       - db_data:/var/lib/mysql
 
       # 2. 初始化脚本（首次启动执行，仅一次）
-      - ./init:/docker-entrypoint-initdb.d
+      - ./database/init:/docker-entrypoint-initdb.d
 
       # 3. 备用：随时手动挂载更新文件
-      - ./migrations:/migrations
+      - ./database/migrations:/migrations
     command: --default-authentication-plugin=mysql_native_password
 
   backend:
