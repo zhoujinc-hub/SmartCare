@@ -4,7 +4,7 @@ import type { AlertQueryParams,HandleAlertParams } from '@/types/alertType';
 // 获取告警列表
 export function getAlertList(params: AlertQueryParams) {
   return request({
-    url: '/alert-logs',
+    url: '/alertLogs/list',
     method: 'get',
     params
   });
@@ -13,7 +13,7 @@ export function getAlertList(params: AlertQueryParams) {
 // 获取告警详情
 export function getAlertDetail(alertId: bigint) {
   return request({
-    url: `/alert-logs/${alertId}`,
+    url: `/alertLogs/${alertId}`,
     method: 'get'
   });
 }
@@ -21,7 +21,7 @@ export function getAlertDetail(alertId: bigint) {
 // 处理告警
 export function handleAlert(params: HandleAlertParams) {
   return request({
-    url: '/alert-logs/handle',
+    url: '/alertLogs/handle',
     method: 'put',
     data: params
   });
@@ -30,7 +30,7 @@ export function handleAlert(params: HandleAlertParams) {
 // 重发告警
 export function resendAlert(alertId: bigint) {
   return request({
-    url: `/alert-logs/${alertId}/resend`,
+    url: `/alertLogs/${alertId}/resend`,
     method: 'post'
   });
 }

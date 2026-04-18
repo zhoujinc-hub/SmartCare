@@ -1,71 +1,51 @@
-import request from '../utils/request';
-import type { 
-  AlertFilterParams,
-  PaginationParams, 
-  AlertListResponse, 
-  BaseResponse 
-} from '../types/fallEvent';
+import request from '@/utils/request'
 
-/**
- * 获取告警列表（分页+筛选）
- * @param pagination 分页参数
- * @param filterParams 筛选参数
- * @returns 告警列表数据
- */
-export const getAlertList = async (
-  pagination: Pick<PaginationParams, 'pageNum' | 'pageSize'>,
-  filterParams: AlertFilterParams
-): Promise<AlertListResponse> => {
-  const params = {
-    pageNum: pagination.pageNum,
-    pageSize: pagination.pageSize,
-    cameraType: filterParams.eventType || undefined,
-    status: filterParams.status || undefined,
-    startTime: filterParams.dateRange?.[0] || undefined,
-    endTime: filterParams.dateRange?.[1] || undefined
-  };
+// 查询参数类型
+interface FallEventQuery {
+    elderName?: string
+    cameraId?: number
+    status?: number
+    pageNum: number
+    pageSize: number
+}
 
-  return request({
-    url: '/api/fall-events/list',
-    method: 'POST',
-    data: params
-  });
-};
+// 处理事件参数
+interface HandleEventData {
+    status: number
+    processNotes?: string
+}
 
-/**
- * 标记告警为已处理
- * @param eventId 告警ID
- * @param processedBy 处理人ID
- * @returns 处理结果
- */
-export const handleAlert = async (
-  eventId: number,
-  processedBy: number
-): Promise<BaseResponse> => {
-  return request({
-    url: `/api/fall-events/handle/${eventId}`,
-    method: 'PUT',
-    data: {
-      status: 2,
-      processedBy,
-      processedAt: new Date().toISOString()
-    }
-  });
-};
+// 获取跌倒事件列表
+export function getFallEventList(data: FallEventQuery) {
+    return request({
+        url: '/fallEvents/list',
+        method: 'post',
+        data
+    })
+}
 
-/**
- * 保存告警处理备注
- * @param eventId 告警ID
- * @param processNotes 处理备注
- * @returns 保存结果
- */
-export const saveAlertNotes = async (
-  eventId: number,
-  processNotes: string
-): Promise<BaseResponse> => {
-  return request({
-    url: `/api/fall-events/notes/${eventId}`,
-    method: 'PUT',
-    data: { processNotes }
-  });
-};
+// 获取详情
+export function getFallEventDetail(eventId: number) {
+    return request({
+        url: `/fallEvents/detail/${eventId}`,
+        method: 'get'
+    })
+}
+
+// 处理事件
+export function handleFallEvent(eventId: number, data: HandleEventData) {
+    return request({
+        url: `/fallEvents/handle/${eventId}`,
+        method: 'put',
+        data
+    })
+}
+
+// 添加备注
+export function saveFallEventNotes(eventId: number, processNotes: string) {
+    return request({
+        url: `/fallEvents/notes/${eventId}`,
+        method: 'put',
+        data: { processNotes }
+    })
+}

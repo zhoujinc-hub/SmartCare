@@ -1,65 +1,52 @@
-import type { LocalUserInfo } from '../types/user'
+import type { LocalUserInfo } from '@/types/user'
 
-/**
- * 存储Token到本地
- * @param token 登录令牌
- */
+// Token 存储 key
+const TOKEN_KEY = 'USER_TOKEN'
+// 用户信息存储 key
+const USER_INFO_KEY = 'USER_INFO'
+// 记住用户 key
+const REMEMBER_USER_KEY = 'REMEMBER_USER'
+
+// 设置 Token
 export const setToken = (token: string) => {
-  localStorage.setItem('token', token)
+    localStorage.setItem(TOKEN_KEY, token)
 }
 
-/**
- * 获取本地Token
- */
+// 获取 Token
 export const getToken = () => {
-  return localStorage.getItem('token') || ''
+    return localStorage.getItem(TOKEN_KEY)
 }
 
-/**
- * 存储用户信息到本地
- * @param userInfo 用户信息
- */
-export const setUserInfo = (userInfo: LocalUserInfo) => {
-  localStorage.setItem('userInfo', JSON.stringify(userInfo))
+// 设置用户信息
+export const setUserInfo = (info: LocalUserInfo) => {
+    localStorage.setItem(USER_INFO_KEY, JSON.stringify(info))
 }
 
-/**
- * 获取本地用户信息
- */
-export const getUserInfo = (): LocalUserInfo => {
-  const info = localStorage.getItem('userInfo')
-  return info ? JSON.parse(info) : {}
+// 获取用户信息
+export const getUserInfo = (): LocalUserInfo | null => {
+    const info = localStorage.getItem(USER_INFO_KEY)
+    return info ? JSON.parse(info) : null
 }
 
-/**
- * 存储记住的用户信息
- * @param username 账号
- * @param userType 用户类型
- */
+// 记住用户（账号+用户类型）
 export const setRememberUser = (username: string, userType: number) => {
-  localStorage.setItem('rememberUser', JSON.stringify({ username, userType }))
+    localStorage.setItem(REMEMBER_USER_KEY, JSON.stringify({ username, userType }))
 }
 
-/**
- * 获取记住的用户信息
- */
+// 获取记住的用户信息
 export const getRememberUser = () => {
-  const user = localStorage.getItem('rememberUser')
-  return user ? JSON.parse(user) : { username: '', userType: 2 }
+    const info = localStorage.getItem(REMEMBER_USER_KEY)
+    return info ? JSON.parse(info) : { username: '', userType: '' }
 }
 
-/**
- * 清除记住的用户信息
- */
+// 清除记住的用户信息
 export const clearRememberUser = () => {
-  localStorage.removeItem('rememberUser')
+    localStorage.removeItem(REMEMBER_USER_KEY)
 }
 
-/**
- * 退出登录（清空本地存储）
- */
+// 退出登录
 export const logout = () => {
-  localStorage.removeItem('token')
-  localStorage.removeItem('userInfo')
-  localStorage.removeItem('rememberUser')
+    localStorage.removeItem(TOKEN_KEY)
+    localStorage.removeItem(USER_INFO_KEY)
+    localStorage.removeItem(REMEMBER_USER_KEY)
 }

@@ -1,12 +1,12 @@
 <template>
   <el-dialog
-    title="忘记密码"
-    :model-value="modelValue"
-    @update:model-value="handleModelValueChange"
-    width="400px"
-    destroy-on-close
-    center
-    @close="handleClose"
+      title="忘记密码"
+      :model-value="modelValue"
+      @update:model-value="emit('update:modelValue', $event)"
+      width="400px"
+      destroy-on-close
+      center
+      @close="handleClose"
   >
     <el-form :model="form" :rules="rules" ref="formRef" label-width="100px">
       <el-form-item label="手机号" prop="phone">
@@ -18,11 +18,11 @@
             <el-input v-model="form.code" placeholder="请输入验证码"></el-input>
           </el-col>
           <el-col :span="10">
-            <el-button 
-              type="text" 
-              class="code-btn"
-              :disabled="countdown > 0"
-              @click="sendCode"
+            <el-button
+                type="text"
+                class="code-btn"
+                :disabled="countdown > 0"
+                @click="sendCode"
             >
               {{ countdown > 0 ? `${countdown}秒后重发` : '获取验证码' }}
             </el-button>
@@ -46,7 +46,7 @@
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
 import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
-import type { ForgotForm } from '@/types/user'
+import type { ForgotForm, CodeResponse, ResetPwdResponse } from '@/types/user'
 import { sendVerifyCode, resetUserPassword } from '@/api/user'
 
 const props = defineProps<{
@@ -67,7 +67,7 @@ const form = reactive<ForgotForm>({
   confirmPassword: ''
 })
 
-const rules = reactive<FormRules>({
+const rules: FormRules = {
   phone: [
     { required: true, message: '请输入手机号', trigger: 'blur' },
     { pattern: /^1[3-9]\d{9}$/, message: '请输入正确手机号', trigger: 'blur' }
@@ -80,7 +80,7 @@ const rules = reactive<FormRules>({
   confirmPassword: [
     { required: true, message: '请确认密码', trigger: 'blur' },
     {
-      validator: (rule, value, callback) => {
+      validator: (_, value, callback) => {
         if (value !== form.newPassword) {
           callback(new Error('两次密码输入不一致'))
         } else {
@@ -90,20 +90,18 @@ const rules = reactive<FormRules>({
       trigger: 'blur'
     }
   ]
-})
-
-const handleModelValueChange = (value: boolean) => {
-  emit('update:modelValue', value)
 }
 
+// ✅ 修复：直接使用类型断言，避免和 request.ts 的响应拦截器冲突
 const sendCode = async () => {
   if (!/^1[3-9]\d{9}$/.test(form.phone)) {
     ElMessage.warning('请输入正确的手机号')
     return
   }
   try {
-    const res = await sendVerifyCode(form.phone)
-    if (res.data.code === 200) {
+    // 用 unknown 中转，避免类型冲突
+    const res = await sendVerifyCode(form.phone) as unknown as CodeResponse
+    if (res.code === 200) {
       ElMessage.success('验证码已发送至您的手机')
       countdown.value = 60
       const timer = setInterval(() => {
@@ -111,28 +109,32 @@ const sendCode = async () => {
         if (countdown.value <= 0) clearInterval(timer)
       }, 1000)
     } else {
-      ElMessage.error(res.data.message || '验证码发送失败')
+      ElMessage.error(res.message || '验证码发送失败')
     }
   } catch (error) {
-    console.error('发送验证码接口异常：', error)
+    console.error(error)
     ElMessage.error('网络异常，验证码发送失败')
   }
 }
 
 const resetPassword = async () => {
   try {
-    if (!formRef.value) return
-    await formRef.value.validate()
-    const res = await resetUserPassword(form)
-    if (res.data.code === 200) {
+    await formRef.value?.validate()
+    const res = await resetUserPassword({
+      phone: form.phone,
+      code: form.code,
+      newPassword: form.newPassword
+    }) as unknown as ResetPwdResponse
+
+    if (res.code === 200) {
       ElMessage.success('密码重置成功，请重新登录')
       emit('update:modelValue', false)
       emit('reset-success')
     } else {
-      ElMessage.error(res.data.message || '密码重置失败')
+      ElMessage.error(res.message || '密码重置失败')
     }
   } catch (error) {
-    console.error('重置密码接口异常：', error)
+    console.error(error)
     ElMessage.error('网络异常，密码重置失败')
   }
 }
@@ -143,7 +145,6 @@ const handleClose = () => {
   form.newPassword = ''
   form.confirmPassword = ''
   countdown.value = 0
-  emit('update:modelValue', false)
 }
 </script>
 
@@ -154,6 +155,4 @@ const handleClose = () => {
   border: 1px solid #e6f7ff;
   background-color: #f0f9ff;
 }
-:deep(.el-dialog__header) { border-bottom: 1px solid #e6e6e6; padding-bottom: 12px; }
-:deep(.el-dialog__footer) { border-top: 1px solid #e6e6e6; padding-top: 12px; }
 </style>

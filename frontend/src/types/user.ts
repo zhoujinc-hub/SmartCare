@@ -18,7 +18,6 @@ export interface LoginResponse {
     phone?: string               // 对应 users.phone
     userType?: number            // 对应 users.user_type
     status?: number              // 对应 users.status（0=禁用 1=启用）
-    expires?: number             // token过期时间
   }
 }
 

@@ -7,8 +7,8 @@
 
       <el-form-item label="性别" prop="gender">
         <el-radio-group v-model="form.gender">
+          <el-radio :label="0">女</el-radio>
           <el-radio :label="1">男</el-radio>
-          <el-radio :label="2">女</el-radio>
         </el-radio-group>
       </el-form-item>
 
@@ -38,10 +38,10 @@
 
       <el-form-item label="身体条件备注">
         <el-input
-          v-model="form.physical_notes"
-          type="textarea"
-          :rows="3"
-          placeholder="请输入身体状况、病史等备注"
+            v-model="form.physical_notes"
+            type="textarea"
+            :rows="3"
+            placeholder="请输入身体状况、病史等备注"
         />
       </el-form-item>
     </el-form>
@@ -61,7 +61,7 @@ import type { ElderItem } from '@/types/elder'
 
 const props = defineProps<{
   modelValue: boolean
-  elderId: number
+  elderId?: number
 }>()
 
 const emit = defineEmits<{
@@ -74,14 +74,14 @@ const formRef = ref()
 const form = ref<ElderItem>({
   elder_id: 0,
   name: '',
-  gender: 1,
+  gender: 0,
   age: 0,
   address: '',
   family_contact1: '',
   family_phone1: '',
   family_contact2: '',
   family_phone2: '',
-  physical_notes: '',
+  physical_notes: null,
   created_at: ''
 })
 
@@ -91,38 +91,38 @@ const rules = {
   gender: [{ required: true, message: '请选择性别', trigger: 'change' }]
 }
 
-watch(() => props.modelValue, (val) => {
+watch(() => props.modelValue, async (val) => {
   dialogVisible.value = val
-  if (val) {
-    if (props.elderId) {
-      getElderDetail(props.elderId).then(res => {
-        form.value = res.data
-      })
-    } else {
-      form.value = {
-        elder_id: 0,
-        name: '',
-        gender: 1,
-        age: 0,
-        address: '',
-        family_contact1: '',
-        family_phone1: '',
-        family_contact2: '',
-        family_phone2: '',
-        physical_notes: '',
-        created_at: ''
-      }
+  if (val && props.elderId) {
+    try {
+      const res = await getElderDetail(props.elderId)
+      form.value = { ...res.data }
+    } catch {
+      ElMessage.error('加载详情失败')
     }
   }
-})
+  if (!val) {
+    form.value = {
+      elder_id: 0,
+      name: '',
+      gender: 0,
+      age: 0,
+      address: '',
+      family_contact1: '',
+      family_phone1: '',
+      family_contact2: '',
+      family_phone2: '',
+      physical_notes: null,
+      created_at: ''
+    }
+  }
+}, { immediate: true })
 
-watch(() => dialogVisible.value, (val) => {
-  emit('update:modelValue', val)
-})
+watch(() => dialogVisible.value, (val) => emit('update:modelValue', val))
 
 async function submit() {
-  await formRef.value.validate()
   try {
+    await formRef.value.validate()
     if (props.elderId) {
       await updateElder(form.value)
       ElMessage.success('修改成功')
@@ -132,8 +132,8 @@ async function submit() {
     }
     emit('success')
     dialogVisible.value = false
-  } catch (e) {
-    console.error(e)
+  } catch {
+    ElMessage.error('提交失败')
   }
 }
 </script>

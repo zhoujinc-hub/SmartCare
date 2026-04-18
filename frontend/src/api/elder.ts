@@ -1,89 +1,55 @@
 import request from '../utils/request';
-import type {
-  ElderItem,
-  ElderFormData,
-  ElderDetailItem,
-} from '../types/elder';
-
-import type {
-  PageResponse,
-  BaseResponse,
-  RelationItem
-} from '../types/user';
+import type { ElderItem, ElderFormData } from '../types/elder';
+import type { PageResponse, BaseResponse } from '../types/user';
 
 interface PaginationParams {
-  pageNum: number;
-  pageSize: number;
+    pageNum: number;
+    pageSize: number;
 }
 
-/**
- * 获取老人列表（分页+筛选）
- */
-export const getElderList = async (
-  pagination: PaginationParams,
-  filterParams: { name?: string }
-): Promise<PageResponse<ElderItem>> => {
-  const params = {
-    name: filterParams.name,
-    pageNum: pagination.pageNum,
-    pageSize: pagination.pageSize
-  };
+// 列表
+export const getElderList = (params: {
+    name?: string
+    pageNum: number
+    pageSize: number
+}) => {
+    return request({
+        url: '/elders/list',
+        method: 'POST', // 必须是 POST！
+        data: params    // 所有参数放在 data 里
+    })
+}
 
-  return request({
-    url: '/api/elder/list',
-    method: 'GET',
-    params
-  });
+// 新增
+export const addElder = (data: ElderFormData): Promise<BaseResponse> => {
+    return request({
+        url: '/elders/add',
+        method: 'POST',
+        data
+    });
 };
 
-/**
- * 新增老人
- */
-export const addElder = async (formData: ElderFormData): Promise<BaseResponse> => {
-  return request({
-    url: '/api/elder/add',
-    method: 'POST',
-    data: formData
-  });
+// 修改
+export const updateElder = (data: ElderItem): Promise<BaseResponse> => {
+    return request({
+        url: '/elders/update',
+        method: 'PUT',
+        data
+    });
 };
 
-/**
- * 修改老人
- */
-export const updateElder = async (formData: ElderFormData): Promise<BaseResponse> => {
-  return request({
-    url: '/api/elder/update',
-    method: 'PUT',
-    data: formData
-  });
+// 删除
+export const deleteElder = (elder_id: number): Promise<BaseResponse> => {
+    return request({
+        url: `/elders/delete/${elder_id}`,
+        method: 'DELETE'
+    });
 };
 
-/**
- * 删除老人
- */
-export const deleteElder = async (elderId: number): Promise<BaseResponse> => {
-  return request({
-    url: `/api/elder/delete/${elderId}`,
-    method: 'DELETE'
-  });
-};
-
-/**
- * 获取老人详情
- */
-export const getElderDetail = async (elderId: number): Promise<BaseResponse & { data: ElderDetailItem }> => {
-  return request({
-    url: `/api/elder/detail/${elderId}`,
-    method: 'GET'
-  });
-};
-
-/**
- * 获取老人关联家属
- */
-export const getElderRelations = async (elderId: number): Promise<BaseResponse & { data: RelationItem[] }> => {
-  return request({
-    url: `/api/relation/list/${elderId}`,
-    method: 'GET'
-  });
+// 详情
+export const getElderDetail = (elder_id: number): Promise<{ data: ElderItem }> => {
+    return request({
+        url: `/elders/detail/${elder_id}`,
+        method: 'GET'
+    });
 };

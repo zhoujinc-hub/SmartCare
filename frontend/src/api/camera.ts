@@ -20,21 +20,12 @@ export const getCameraList = async (
   }
 ): Promise<PageResponse<CameraItem>> => {
   return request({
-    url: '/api/camera/list',
+    url: '/cameras/list',
     method: 'GET',
     params
   });
 };
 
-/**
- * 获取家庭列表（用于关联选择）
- */
-export const getHouseholdList = async (): Promise<BaseResponse & { data: HouseholdItem[] }> => {
-  return request({
-    url: '/api/household/list',
-    method: 'GET'
-  });
-};
 
 /**
  * 新增摄像头
@@ -51,7 +42,7 @@ export const addCamera = async (formData: CameraFormData): Promise<BaseResponse>
     status: formData.status
   };
   return request({
-    url: '/api/camera/add',
+    url: '/cameras/add',
     method: 'POST',
     data: {
       ...cameraData,
@@ -77,7 +68,7 @@ export const updateCamera = async (formData: CameraFormData): Promise<BaseRespon
     status: formData.status
   };
   return request({
-    url: '/api/camera/update',
+    url: '/cameras/update',
     method: 'PUT',
     data: {
       ...cameraData,
@@ -92,7 +83,7 @@ export const updateCamera = async (formData: CameraFormData): Promise<BaseRespon
  */
 export const deleteCamera = async (cameraId: number): Promise<BaseResponse> => {
   return request({
-    url: `/api/camera/delete/${cameraId}`,
+    url: `/cameras/delete/${cameraId}`,
     method: 'DELETE'
   });
 };
@@ -102,7 +93,7 @@ export const deleteCamera = async (cameraId: number): Promise<BaseResponse> => {
  */
 export const getCameraDetail = async (cameraId: number): Promise<BaseResponse & { data: CameraItem }> => {
   return request({
-    url: `/api/camera/detail/${cameraId}`,
+    url: `/cameras/detail/${cameraId}`,
     method: 'GET'
   });
 };
@@ -112,7 +103,7 @@ export const getCameraDetail = async (cameraId: number): Promise<BaseResponse & 
  */
 export const refreshCameraStatus = async (): Promise<BaseResponse> => {
   return request({
-    url: '/api/camera/refreshStatus',
+    url: '/cameras/refreshStatus',
     method: 'POST'
   });
 };

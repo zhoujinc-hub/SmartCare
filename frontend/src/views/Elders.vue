@@ -91,11 +91,23 @@ onMounted(() => getList())
 async function getList() {
   loading.value = true
   try {
-    const res = await getElderList(
-      { pageNum: pagination.pageNum, pageSize: pagination.pageSize },
-      { name: query.name }
-    )
-    elderList.value = res.data.list
+    // 🔥 按接口要求：只传 1 个对象，包含 name / pageNum / pageSize
+    const params = {
+      name: query.name,
+      pageNum: pagination.pageNum,
+      pageSize: pagination.pageSize
+    }
+    console.log('请求参数：', params);
+    console.log(typeof params.pageNum === 'number')
+
+    const res = await getElderList(params)
+
+    // 空值保护：接口返回结构是 { code, message, data: { records: [...] } }
+    elderList.value = res?.data?.records ?? []
+  } catch (error) {
+    console.error('获取长辈列表失败：', error)
+    ElMessage.error('获取列表失败，请稍后重试')
+    elderList.value = []
   } finally {
     loading.value = false
   }
@@ -140,8 +152,8 @@ function resetQuery() {
 }
 
 :deep(.el-table__header .el-table__cell) {
-  color: #1f2937 !important; 
-  font-weight: 600; 
+  color: #1f2937 !important;
+  font-weight: 600;
 }
 
 :deep(.el-table__empty-text) {
