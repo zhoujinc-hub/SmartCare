@@ -17,7 +17,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/elders")
+@RequestMapping("/api/elders")
 public class EldersController {
 
     private final EldersServiceImpl eldersService;

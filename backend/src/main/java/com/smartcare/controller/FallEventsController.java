@@ -16,7 +16,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/fallEvents")
+@RequestMapping("/api/fallEvents")
 public class FallEventsController {
 
     private final FallEventsServiceImpl fallEventsService;
