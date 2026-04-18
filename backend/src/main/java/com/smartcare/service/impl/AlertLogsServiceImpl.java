@@ -3,6 +3,7 @@ package com.smartcare.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.smartcare.dto.alert.AlertLogQueryDto;
+import com.smartcare.dto.alert.HandleAlertDto;
 import com.smartcare.entity.AlertLogs;
 import com.smartcare.mapper.AlertLogsMapper;
 import com.smartcare.service.AlertLogsService;
@@ -51,5 +52,44 @@ public class AlertLogsServiceImpl implements AlertLogsService {
         result.setPageSize(alertPage.getSize());
         result.setRecords(voList);
         return result;
+    }
+
+    @Override
+    public AlertLogVo detail(Long alertId) {
+        AlertLogs log = alertLogsMapper.selectById(alertId);
+
+        if (log == null) {
+            throw new RuntimeException("告警不存在");
+        }
+
+        AlertLogVo vo = new AlertLogVo();
+        BeanUtils.copyProperties(log, vo);
+        return vo;
+    }
+
+    @Override
+    public void handle(HandleAlertDto dto) {
+        AlertLogs log = alertLogsMapper.selectById(dto.getAlertId());
+
+        if (log == null) {
+            throw new RuntimeException("告警不存在");
+        }
+
+        log.setSendStatus(dto.getSendStatus());
+        alertLogsMapper.updateById(log);
+    }
+
+    @Override
+    public void resend(Long alertId) {
+        AlertLogs log = alertLogsMapper.selectById(alertId);
+
+        if (log == null) {
+            throw new RuntimeException("告警不存在");
+        }
+
+        log.setSendStatus((byte) 1);
+        log.setErrorMsg(null);
+
+        alertLogsMapper.updateById(log);
     }
 }
