@@ -16,7 +16,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/cameras")
+@RequestMapping("/api/cameras")
 public class CamerasController {
 
     private final CamerasServiceImpl camerasService;
