@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/relations")
+@RequestMapping("/api/relations")
 public class RelationsController {
 
     private final RelationsServiceImpl relationsService;

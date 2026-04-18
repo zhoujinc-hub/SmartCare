@@ -14,7 +14,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/alertLogs")
+@RequestMapping("/api/alertLogs")
 public class AlertLogsController {
 
 
