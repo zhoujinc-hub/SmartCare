@@ -92,11 +92,10 @@ async function getList() {
     const res = await getElderList(
         {
           pageNum: pagination.pageNum,
-          pageSize: pagination.pageSize
-        },
-        {
+          pageSize: pagination.pageSize,
           name: query.name
-        }
+        },
+
     )
     elderList.value = res.data?.list ?? []
     total.value = res.data?.total ?? 0
