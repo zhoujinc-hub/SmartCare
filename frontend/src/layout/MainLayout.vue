@@ -19,9 +19,6 @@
         <el-menu-item index="/elders" style="height: 60px; line-height: 60px;">
           <span>老人管理</span>
         </el-menu-item>
-        <el-menu-item index="/households" style="height: 60px; line-height: 60px;">
-          <span>家庭管理</span>
-        </el-menu-item>
         <el-menu-item index="/cameras" style="height: 60px; line-height: 60px;">
           <span>摄像头管理</span>
         </el-menu-item>

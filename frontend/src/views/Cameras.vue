@@ -139,7 +139,7 @@ import CameraForm from '@/components/cameras/CameraForm.vue';
 import CameraDetail from '@/components/cameras/CameraDetail.vue';
 import CameraPreview from '@/components/cameras/CameraPreview.vue';
 import type { CameraItem, CameraFormData, HouseholdItem } from '@/types/camera';
-import { getCameraList, getHouseholdList, getCameraDetail, deleteCamera, refreshCameraStatus, updateCamera } from '@/api/camera';
+import { getCameraList, getCameraDetail, deleteCamera, refreshCameraStatus, updateCamera } from '@/api/camera';
 
 // 状态
 const loading = ref(false);
@@ -185,7 +185,6 @@ const formData = reactive<CameraFormData>({
 
 // 初始化数据
 onMounted(async () => {
-  await fetchHouseholdList();
   await fetchCameraList();
 });
 
@@ -207,12 +206,6 @@ const fetchCameraList = async () => {
   } finally {
     loading.value = false;
   }
-};
-
-// 获取家庭列表
-const fetchHouseholdList = async () => {
-  const res = await getHouseholdList();
-  if (res.code === 200) householdList.value = res.data;
 };
 
 // 表格选择

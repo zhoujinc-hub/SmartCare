@@ -10,8 +10,7 @@
         <p class="login-desc">老人摔倒监测·智能报警·实时守护</p>
       </div>
 
-      <!-- ✅ 事件名改为 kebab-case -->
-      <LoginForm 
+      <LoginForm
         :init-form="initLoginForm"
         @login-success="handleLoginSuccess"
         @forgot-pwd="handleForgotPwd"
@@ -24,8 +23,7 @@
     </el-card>
   </div>
 
-  <!-- ✅ v-model 绑定与子组件 modelValue prop 匹配 -->
-  <ForgotPwd 
+  <ForgotPwd
     v-model="forgotPwdVisible"
     @reset-success="handleResetSuccess"
   />
@@ -62,10 +60,10 @@ onMounted(() => {
 })
 
 const handleLoginSuccess = (userType: number) => {
-  switch (userType) {
-    case 2: router.push('/elderly/list'); break
-    case 1: router.push('/system/dashboard'); break
-    default: router.push('/elderly/list')
+  if (userType === 1) {
+    router.push('/dashboard') // 管理员
+  } else {
+    router.push('/fallEvent')  // 家属 → 跌倒页面
   }
 }
 

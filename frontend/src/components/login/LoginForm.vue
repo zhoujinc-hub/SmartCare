@@ -1,53 +1,53 @@
 <template>
-  <el-form 
-    :model="form" 
-    :rules="rules" 
-    ref="formRef" 
-    label-width="80px"
-    class="login-form"
+  <el-form
+      :model="form"
+      :rules="rules"
+      ref="formRef"
+      label-width="80px"
+      class="login-form"
   >
     <el-form-item label="账号" prop="username">
-      <el-input 
-        v-model="form.username" 
-        placeholder="请输入登录账号"
-        prefix="User"
-        size="large"
+      <el-input
+          v-model="form.username"
+          placeholder="请输入登录账号"
+          prefix="User"
+          size="large"
       ></el-input>
     </el-form-item>
-    
+
     <el-form-item label="密码" prop="password">
-      <el-input 
-        v-model="form.password" 
-        type="password" 
-        placeholder="请输入密码"
-        prefix="Lock"
-        size="large"
+      <el-input
+          v-model="form.password"
+          type="password"
+          placeholder="请输入密码"
+          prefix="Lock"
+          size="large"
       ></el-input>
     </el-form-item>
-    
+
     <el-form-item label="用户类型" prop="userType">
-      <el-select 
-        v-model="form.userType" 
-        placeholder="请选择用户类型"
-        size="large"
+      <el-select
+          v-model="form.userType"
+          placeholder="请选择用户类型"
+          size="large"
       >
         <el-option label="家属" :value="2" />
         <el-option label="管理员" :value="1" />
       </el-select>
     </el-form-item>
-    
+
     <div class="login-form-actions">
       <el-checkbox v-model="form.rememberMe" label="记住密码" size="small"></el-checkbox>
       <el-button type="text" @click="onForgotPwd" size="small">忘记密码？</el-button>
     </div>
-    
+
     <el-form-item>
-      <el-button 
-        type="primary" 
-        @click="onLogin" 
-        class="login-btn"
-        size="large"
-        :loading="loading"
+      <el-button
+          type="primary"
+          @click="onLogin"
+          class="login-btn"
+          size="large"
+          :loading="loading"
       >
         <el-icon v-if="loading" class="loading-icon"><Loading /></el-icon>
         登录系统
@@ -60,70 +60,67 @@
 import { ref, reactive } from 'vue'
 import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
 import { Loading } from '@element-plus/icons-vue'
-import type { LoginForm } from '@/types/user'
+import type { LoginForm, LoginResponse } from '@/types/user'
 import { userLogin } from '@/api/user'
 import { setToken, setUserInfo, setRememberUser, clearRememberUser } from '@/utils/auth'
 
-const props = defineProps<{
-  initForm: LoginForm
-}>()
+const props = defineProps({
+  initForm: {
+    type: Object as () => LoginForm,
+    default: () => ({
+      username: '',
+      password: '',
+      userType: 1,
+      rememberMe: false
+    })
+  }
+})
 
-const emit = defineEmits<{
-  (e: 'login-success', userType: number): void
-  (e: 'forgot-pwd'): void
-}>()
+const emit = defineEmits(['login-success', 'forgot-pwd'])
 
 const formRef = ref<FormInstance>()
 const loading = ref(false)
-const form = reactive<LoginForm>({
-  ...props.initForm
-})
+const form = reactive<LoginForm>({ ...props.initForm })
 
-const rules = reactive<FormRules>({
+const rules: FormRules = {
   username: [{ required: true, message: '请输入账号', trigger: 'blur' }],
-  password: [{ required: true, message: '请输入密码', trigger: 'blur' }, { min: 6, max: 20, message: '密码长度6-20位', trigger: 'blur' }],
+  password: [
+    { required: true, message: '请输入密码', trigger: 'blur' },
+    { min: 6, max: 20, message: '密码长度6-20位', trigger: 'blur' }
+  ],
   userType: [{ required: true, message: '请选择用户类型', trigger: 'change' }]
-})
+}
 
 const onLogin = async () => {
   try {
-    if (!formRef.value) return
-    await formRef.value.validate()
-
+    await formRef.value?.validate()
     loading.value = true
-    const res = await userLogin(form)
-    
-    if (res.data.code === 200 && res.data.data?.token) {
-      if (res.data.data.status === 0) {
-        ElMessage.error('账号已被禁用，请联系管理员')
-        loading.value = false
-        return
-      }
 
-      setToken(res.data.data.token)
-      setUserInfo({
-        userId: res.data.data.userId,
-        username: res.data.data.username,
-        realName: res.data.data.realName,
-        phone: res.data.data.phone,
-        userType: res.data.data.userType,
-        status: res.data.data.status
-      })
+    const { username, password, userType } = form
+    const response = await userLogin({ username, password, userType })
 
-      if (form.rememberMe) {
-        setRememberUser(form.username, form.userType)
-      } else {
-        clearRememberUser()
-      }
+    console.log("后端原始响应:", response)
 
-      ElMessage.success('登录成功，正在跳转...')
-      emit('login-success', form.userType)
-    } else {
-      ElMessage.error(res.data.message || '登录失败，请检查账号密码')
+    // 防御：如果 response.data 是 null，直接报错
+    if (!response.data) {
+      ElMessage.error("登录失败：服务器未返回有效数据")
+      return
     }
-  } catch (error) {
-    console.error('登录接口调用异常：', error)
-    ElMessage.error('网络异常，登录失败，请重试')
+
+    const userInfo = response.data as any
+    console.log("用户信息:", userInfo)
+
+    if (userInfo.token) {
+      setToken(userInfo.token)
+      setUserInfo(userInfo)
+      ElMessage.success("登录成功！")
+      emit('login-success', userType)
+    } else {
+      ElMessage.error("登录失败：服务器未返回 token")
+    }
+  } catch (err) {
+    console.error(err)
+    ElMessage.error("网络异常")
   } finally {
     loading.value = false
   }
@@ -134,11 +131,7 @@ const onForgotPwd = () => {
 }
 
 defineExpose({
-  resetForm: () => {
-    if (formRef.value) {
-      formRef.value.resetFields()
-    }
-  }
+  resetForm: () => formRef.value?.resetFields()
 })
 </script>
 
@@ -155,34 +148,18 @@ defineExpose({
   width: 100%;
 }
 
-:deep(.el-input__prefix) {
-  color: #409eff;
-}
-
 .login-form-actions {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 15px;
-  gap: 20px; 
-}
-
-:deep(.el-checkbox__label) {
-  color: #666666;
-  font-size: 14px;
-}
-
-:deep(.el-button--text) {
-  color: #409eff;
-  font-size: 14px;
+  gap: 20px;
 }
 
 .login-btn {
   width: 300px;
   height: 44px;
   font-size: 16px;
-  margin-left: -50px; 
-  margin-right: 20px;
 }
 
 .loading-icon {
