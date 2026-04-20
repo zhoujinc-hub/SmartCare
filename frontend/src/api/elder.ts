@@ -39,17 +39,17 @@ export const updateElder = (data: ElderItem): Promise<BaseResponse> => {
 };
 
 // 删除
-export const deleteElder = (elder_id: number): Promise<BaseResponse> => {
+export const deleteElder = (elderId: number): Promise<BaseResponse> => {
     return request({
-        url: `/elders/delete/${elder_id}`,
+        url: `/elders/delete/${elderId}`,
         method: 'DELETE'
     });
 };
 
 // 详情
-export const getElderDetail = (elder_id: number): Promise<{ data: ElderItem }> => {
+export const getElderDetail = (elderId: number): Promise<{ data: ElderItem }> => {
     return request({
-        url: `/elders/detail/${elder_id}`,
+        url: `/elders/detail/${elderId}`,
         method: 'GET'
     });
 };

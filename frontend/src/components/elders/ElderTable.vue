@@ -35,7 +35,7 @@
       <el-table-column label="年龄" prop="age" width="80" />
       <el-table-column label="家庭住址" prop="address" min-width="180" />
       <el-table-column label="健康备注" prop="healthNotes" min-width="180" />
-      <el-table-column label="创建时间" prop="created_at" width="180" />
+      <el-table-column label="创建时间" prop="createdAt" width="180" />
       <el-table-column label="操作" width="220" fixed="right">
         <template #default="{ row }">
           <el-button size="small" type="primary" @click="openDetail(row)">查看</el-button>

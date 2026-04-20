@@ -21,24 +21,24 @@
       </el-form-item>
 
       <el-form-item label="联系人1">
-        <el-input v-model="form.family_contact1" placeholder="联系人1" />
+        <el-input v-model="form.familyContact1" placeholder="联系人1" />
       </el-form-item>
 
       <el-form-item label="电话1">
-        <el-input v-model="form.family_phone1" placeholder="电话1" />
+        <el-input v-model="form.familyPhone1" placeholder="电话1" />
       </el-form-item>
 
       <el-form-item label="联系人2">
-        <el-input v-model="form.family_contact2" placeholder="联系人2" />
+        <el-input v-model="form.familyContact2" placeholder="联系人2" />
       </el-form-item>
 
       <el-form-item label="电话2">
-        <el-input v-model="form.family_phone2" placeholder="电话2" />
+        <el-input v-model="form.familyPhone2" placeholder="电话2" />
       </el-form-item>
 
       <el-form-item label="身体条件备注">
         <el-input
-            v-model="form.physical_notes"
+            v-model="form.healthNotes"
             type="textarea"
             :rows="3"
             placeholder="请输入身体状况、病史等备注"
@@ -72,17 +72,17 @@ const emit = defineEmits<{
 const dialogVisible = ref(false)
 const formRef = ref()
 const form = ref<ElderItem>({
-  elder_id: 0,
+  elderId: 0,
   name: '',
   gender: 0,
   age: 0,
   address: '',
-  family_contact1: '',
-  family_phone1: '',
-  family_contact2: '',
-  family_phone2: '',
-  physical_notes: null,
-  created_at: ''
+  familyContact1: '',
+  familyPhone1: '',
+  familyContact2: '',
+  familyPhone2: '',
+  healthNotes: null,
+  createdAt: ''
 })
 
 const rules = {
@@ -103,17 +103,17 @@ watch(() => props.modelValue, async (val) => {
   }
   if (!val) {
     form.value = {
-      elder_id: 0,
+      elderId: 0,
       name: '',
       gender: 0,
       age: 0,
       address: '',
-      family_contact1: '',
-      family_phone1: '',
-      family_contact2: '',
-      family_phone2: '',
-      physical_notes: null,
-      created_at: ''
+      familyContact1: '',
+      familyPhone1: '',
+      familyContact2: '',
+      familyPhone2: '',
+      healthNotes: null,
+      createdAt: ''
     }
   }
 }, { immediate: true })

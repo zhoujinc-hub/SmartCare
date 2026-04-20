@@ -1,19 +1,19 @@
 export interface ElderItem {
-    elder_id: number;
+    elderId: number;
     name: string;
     age: number;
     gender: 0 | 1;
     address: string;
-    family_contact1: string;
-    family_phone1: string;
-    family_contact2?: string;
-    family_phone2?: string;
-    created_at: string;
-    physical_notes: string | null;
+    familyContact1: string;
+    familyPhone1: string;
+    familyContact2?: string;
+    familyPhone2?: string;
+    createdAt: string;
+    healthNotes: string | null;
     [key: string]: any;
 }
 
 export interface ElderDetailItem extends ElderItem {}
 
-export interface ElderFormData extends Omit<ElderItem, 'elder_id' | 'created_at'> {}
+export interface ElderFormData extends Omit<ElderItem, 'elderI d' | 'created_at'> {}
 
