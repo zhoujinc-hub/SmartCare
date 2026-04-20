@@ -9,6 +9,14 @@
         <result property="phone" column="phone"/>
     </resultMap>
 
+    <resultMap id="ElderRelativeVoMap" type="com.smartcare.vo.elder.ElderRelativeVo">
+        <id property="relationId" column="relation_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="relationship" column="relationship"/>
+        <result property="realName" column="real_name"/>
+        <result property="phone" column="phone"/>
+    </resultMap>
+
     <select id="selectRelationPage" resultMap="RelationVoMap">
         SELECT
         r.relation_id,
@@ -19,6 +27,19 @@
         LEFT JOIN users u ON r.user_id = u.user_id
         WHERE r.elder_id = #{elderId}
         ORDER BY r.relation_id DESC
+    </select>
+
+    <select id="selectRelativeListByElderId" resultMap="ElderRelativeVoMap">
+        SELECT
+        r.relation_id,
+        r.user_id,
+        r.relationship,
+        u.real_name,
+        u.phone
+        FROM relations r
+        LEFT JOIN users u ON r.user_id = u.user_id
+        WHERE r.elder_id = #{elderId}
+        ORDER BY r.relation_id ASC
     </select>
 
 </mapper>

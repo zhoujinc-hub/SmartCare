@@ -2,6 +2,8 @@ package com.smartcare.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.smartcare.common.ResultCodeEnum;
+import com.smartcare.common.exception.BusinessException;
 import com.smartcare.dto.alert.AlertLogQueryDto;
 import com.smartcare.dto.alert.HandleAlertDto;
 import com.smartcare.entity.AlertLogs;
@@ -57,9 +59,8 @@ public class AlertLogsServiceImpl implements AlertLogsService {
     @Override
     public AlertLogVo detail(Long alertId) {
         AlertLogs log = alertLogsMapper.selectById(alertId);
-
         if (log == null) {
-            throw new RuntimeException("告警不存在");
+            throw new BusinessException(ResultCodeEnum.DATA_NOT_EXIST, "告警不存在");
         }
 
         AlertLogVo vo = new AlertLogVo();
@@ -70,9 +71,8 @@ public class AlertLogsServiceImpl implements AlertLogsService {
     @Override
     public void handle(HandleAlertDto dto) {
         AlertLogs log = alertLogsMapper.selectById(dto.getAlertId());
-
         if (log == null) {
-            throw new RuntimeException("告警不存在");
+            throw new BusinessException(ResultCodeEnum.DATA_NOT_EXIST, "告警不存在");
         }
 
         log.setSendStatus(dto.getSendStatus());
@@ -82,14 +82,12 @@ public class AlertLogsServiceImpl implements AlertLogsService {
     @Override
     public void resend(Long alertId) {
         AlertLogs log = alertLogsMapper.selectById(alertId);
-
         if (log == null) {
-            throw new RuntimeException("告警不存在");
+            throw new BusinessException(ResultCodeEnum.DATA_NOT_EXIST, "告警不存在");
         }
 
         log.setSendStatus((byte) 1);
         log.setErrorMsg(null);
-
         alertLogsMapper.updateById(log);
     }
 }

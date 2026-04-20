@@ -2,7 +2,9 @@ package com.smartcare.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.smartcare.common.ResultCodeEnum;
 import com.smartcare.common.UserContext;
+import com.smartcare.common.exception.BusinessException;
 import com.smartcare.dto.fall.FallEventHandleDto;
 import com.smartcare.dto.fall.FallEventNotesDto;
 import com.smartcare.dto.fall.FallEventQueryDto;
@@ -19,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class FallEventsServiceImpl implements FallEventsService {
@@ -61,13 +64,11 @@ public class FallEventsServiceImpl implements FallEventsService {
         return result;
     }
 
-
     @Override
     public FallEventVo detail(Long eventId) {
         FallEvents event = fallEventsMapper.selectById(eventId);
-
         if (event == null) {
-            throw new RuntimeException("跌倒事件不存在");
+            throw new BusinessException(ResultCodeEnum.FALL_EVENT_NOT_EXIST);
         }
 
         FallEventVo vo = new FallEventVo();
@@ -75,19 +76,17 @@ public class FallEventsServiceImpl implements FallEventsService {
         return vo;
     }
 
-
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void handle(Long eventId, FallEventHandleDto dto) {
-
         FallEvents event = fallEventsMapper.selectById(eventId);
 
         if (event == null) {
-            throw new RuntimeException("跌倒事件不存在");
+            throw new BusinessException(ResultCodeEnum.FALL_EVENT_NOT_EXIST);
         }
 
         if (event.getStatus() != null && event.getStatus() == 2) {
-            throw new RuntimeException("该告警已处理");
+            throw new BusinessException(ResultCodeEnum.FALL_EVENT_ALREADY_HANDLED);
         }
 
         Long userId = UserContext.getUserId();
@@ -97,22 +96,18 @@ public class FallEventsServiceImpl implements FallEventsService {
         event.setProcessedAt(LocalDateTime.now());
 
         fallEventsMapper.updateById(event);
-
     }
-
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void saveNotes(Long eventId, FallEventNotesDto dto) {
-
         FallEvents event = fallEventsMapper.selectById(eventId);
 
         if (event == null) {
-            throw new RuntimeException("跌倒事件不存在");
+            throw new BusinessException(ResultCodeEnum.FALL_EVENT_NOT_EXIST);
         }
 
         event.setProcessNotes(dto.getProcessNotes());
-
         fallEventsMapper.updateById(event);
     }
 }

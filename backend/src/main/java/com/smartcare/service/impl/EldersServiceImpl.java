@@ -1,8 +1,9 @@
 package com.smartcare.service.impl;
 
-
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.smartcare.common.ResultCodeEnum;
+import com.smartcare.common.exception.BusinessException;
 import com.smartcare.dto.elder.ElderQueryDto;
 import com.smartcare.dto.elder.ElderRelativeDto;
 import com.smartcare.dto.elder.ElderSaveDto;
@@ -15,6 +16,7 @@ import com.smartcare.service.EldersService;
 import com.smartcare.vo.Page.PageVo;
 import com.smartcare.vo.elder.ElderDetailVo;
 import com.smartcare.vo.elder.ElderListVo;
+import com.smartcare.vo.elder.ElderRelativeVo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -22,9 +24,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class EldersServiceImpl implements EldersService {
+
     private final EldersMapper eldersMapper;
     private final RelationsMapper relationsMapper;
 
@@ -58,6 +62,10 @@ public class EldersServiceImpl implements EldersService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void add(ElderSaveDto dto) {
+        if (dto.getName() == null || dto.getName().trim().isEmpty()) {
+            throw new BusinessException(ResultCodeEnum.ELDER_NAME_EMPTY);
+        }
+
         Elders elder = new Elders();
         BeanUtils.copyProperties(dto, elder);
         eldersMapper.insert(elder);
@@ -77,13 +85,13 @@ public class EldersServiceImpl implements EldersService {
     @Transactional(rollbackFor = Exception.class)
     public void update(ElderUpdateDto dto) {
         Elders elder = eldersMapper.selectById(dto.getElderId());
-
         if (elder == null) {
-            throw new RuntimeException("老人不存在");
+            throw new BusinessException(ResultCodeEnum.ELDER_NOT_EXIST);
         }
 
         BeanUtils.copyProperties(dto, elder);
         eldersMapper.updateById(elder);
+
         relationsMapper.delete(
                 new LambdaQueryWrapper<Relations>()
                         .eq(Relations::getElderId, dto.getElderId())
@@ -105,8 +113,9 @@ public class EldersServiceImpl implements EldersService {
     public void delete(Long elderId) {
         Elders elder = eldersMapper.selectById(elderId);
         if (elder == null) {
-            throw new RuntimeException("老人不存在");
+            throw new BusinessException(ResultCodeEnum.ELDER_NOT_EXIST);
         }
+
         relationsMapper.delete(
                 new LambdaQueryWrapper<Relations>()
                         .eq(Relations::getElderId, elderId)
@@ -117,28 +126,27 @@ public class EldersServiceImpl implements EldersService {
     @Override
     public ElderDetailVo detail(Long elderId) {
         Elders elder = eldersMapper.selectById(elderId);
-
         if (elder == null) {
-            throw new RuntimeException("老人不存在");
+            throw new BusinessException(ResultCodeEnum.ELDER_NOT_EXIST);
         }
 
         ElderDetailVo detailVo = new ElderDetailVo();
         BeanUtils.copyProperties(elder, detailVo);
 
-        List<Relations> relations = relationsMapper.selectList(
-                new LambdaQueryWrapper<Relations>()
-                        .eq(Relations::getElderId, elderId)
-        );
+        List<ElderRelativeVo> relativeList = relationsMapper.selectRelativeListByElderId(elderId);
 
-        List<ElderRelativeDto> relatives = new ArrayList<>();
-        for (Relations relation : relations) {
-            ElderRelativeDto dto = new ElderRelativeDto();
-            dto.setUserId(relation.getUserId());
-            dto.setRelationship(relation.getRelationship());
-            relatives.add(dto);
+        if (relativeList != null && !relativeList.isEmpty()) {
+            ElderRelativeVo relative1 = relativeList.get(0);
+            detailVo.setFamilyContact1(relative1.getRealName());
+            detailVo.setFamilyPhone1(relative1.getPhone());
         }
 
-        detailVo.setRelatives(relatives);
+        if (relativeList != null && relativeList.size() > 1) {
+            ElderRelativeVo relative2 = relativeList.get(1);
+            detailVo.setFamilyContact2(relative2.getRealName());
+            detailVo.setFamilyPhone2(relative2.getPhone());
+        }
+
         return detailVo;
     }
 }
