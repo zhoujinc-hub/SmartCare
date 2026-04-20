@@ -2,6 +2,8 @@ package com.smartcare.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.smartcare.common.ResultCodeEnum;
+import com.smartcare.common.exception.BusinessException;
 import com.smartcare.dto.camera.CameraQueryDto;
 import com.smartcare.dto.camera.CameraSaveDto;
 import com.smartcare.dto.camera.CameraUpdateDto;
@@ -54,8 +56,16 @@ public class CamerasServiceImpl implements CamerasService {
         result.setRecords(voList);
         return result;
     }
+
     @Override
     public void add(CameraSaveDto dto) {
+        if (dto.getCameraName() == null || dto.getCameraName().trim().isEmpty()) {
+            throw new BusinessException(ResultCodeEnum.CAMERA_NAME_EMPTY);
+        }
+        if (dto.getDeviceSerial() == null || dto.getDeviceSerial().trim().isEmpty()) {
+            throw new BusinessException(ResultCodeEnum.DEVICE_SERIAL_EMPTY);
+        }
+
         Cameras camera = new Cameras();
         BeanUtils.copyProperties(dto, camera);
         camerasMapper.insert(camera);
@@ -64,9 +74,8 @@ public class CamerasServiceImpl implements CamerasService {
     @Override
     public void update(CameraUpdateDto dto) {
         Cameras camera = camerasMapper.selectById(dto.getCameraId());
-
         if (camera == null) {
-            throw new RuntimeException("摄像头不存在");
+            throw new BusinessException(ResultCodeEnum.CAMERA_NOT_EXIST);
         }
 
         BeanUtils.copyProperties(dto, camera);
@@ -76,9 +85,8 @@ public class CamerasServiceImpl implements CamerasService {
     @Override
     public void delete(Long cameraId) {
         Cameras camera = camerasMapper.selectById(cameraId);
-
         if (camera == null) {
-            throw new RuntimeException("摄像头不存在");
+            throw new BusinessException(ResultCodeEnum.CAMERA_NOT_EXIST);
         }
 
         camerasMapper.deleteById(cameraId);
@@ -87,9 +95,8 @@ public class CamerasServiceImpl implements CamerasService {
     @Override
     public CameraVo detail(Long cameraId) {
         Cameras camera = camerasMapper.selectById(cameraId);
-
         if (camera == null) {
-            throw new RuntimeException("摄像头不存在");
+            throw new BusinessException(ResultCodeEnum.CAMERA_NOT_EXIST);
         }
 
         CameraVo vo = new CameraVo();
