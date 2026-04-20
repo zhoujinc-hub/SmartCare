@@ -2,11 +2,11 @@
   <div class="elder-management-container">
     <div class="search-bar">
       <el-input
-        v-model="query.name"
-        placeholder="输入老人姓名搜索"
-        style="width: 260px"
-        clearable
-        @keyup.enter="getList"
+          v-model="query.name"
+          placeholder="输入老人姓名搜索"
+          style="width: 260px"
+          clearable
+          @keyup.enter="getList"
       />
       <el-button type="primary" @click="getList" style="margin-left: 8px">
         <el-icon><Search /></el-icon> 查询
@@ -18,13 +18,13 @@
     </div>
 
     <el-table
-      :data="elderList"
-      border
-      stripe
-      v-loading="loading"
-      style="width:100%;margin-top:16px"
+        :data="elderList"
+        border
+        stripe
+        v-loading="loading"
+        style="width:100%;margin-top:16px"
     >
-      <el-table-column label="ID" prop="elder_id" width="100" />
+      <el-table-column label="ID" prop="elderId" width="100" />
       <el-table-column label="姓名" prop="name" width="120" />
       <el-table-column label="性别" width="80">
         <template #default="{ row }">
@@ -33,22 +33,13 @@
       </el-table-column>
       <el-table-column label="年龄" prop="age" width="80" />
       <el-table-column label="家庭住址" prop="address" min-width="180" />
-
-      <el-table-column label="联系人1" prop="family_contact1" width="120" />
-      <el-table-column label="电话1" prop="family_phone1" width="140" />
-      <el-table-column label="联系人2" prop="family_contact2" width="120" />
-      <el-table-column label="电话2" prop="family_phone2" width="140" />
-
       <el-table-column label="身体条件备注" min-width="200">
         <template #default="{ row }">
-          <el-tooltip :content="row.physical_notes || '无'" placement="top">
-            <span class="text-ellipsis">{{ row.physical_notes || '无' }}</span>
+          <el-tooltip :content="row.healthNotes || '无'" placement="top">
+            <span class="text-ellipsis">{{ row.healthNotes || '无' }}</span>
           </el-tooltip>
         </template>
       </el-table-column>
-
-      <el-table-column label="创建时间" prop="created_at" width="180" />
-
       <el-table-column label="操作" width="220" fixed="right">
         <template #default="{ row }">
           <el-button size="small" type="primary" @click="openDetail(row)">查看</el-button>
@@ -58,10 +49,21 @@
       </el-table-column>
     </el-table>
 
+    <el-pagination
+        v-if="pagination.total > 0"
+        class="mt-4"
+        layout="prev, pager, next, jumper, ->, total, sizes"
+        :total="pagination.total"
+        v-model:page-size="pagination.pageSize"
+        v-model:current-page="pagination.pageNum"
+        @size-change="handleSizeChange"
+        @current-change="handlePageChange"
+    />
+
     <ElderForm
-      v-model="dialogVisible"
-      :elder-id="currentId"
-      @success="getList"
+        v-model="dialogVisible"
+        :elder-id="currentId"
+        @success="getList"
     />
     <ElderDetail v-model="detailVisible" :data="detailData" />
   </div>
@@ -84,33 +86,52 @@ const elderList = ref<ElderItem[]>([])
 const detailData = ref<ElderItem>({} as ElderItem)
 
 const query = reactive({ name: '' })
-const pagination = reactive({ pageNum: 1, pageSize: 10 })
+const pagination = reactive({
+  pageNum: 1,
+  pageSize: 10,
+  total: 0
+})
 
 onMounted(() => getList())
 
 async function getList() {
   loading.value = true
   try {
-    // 🔥 按接口要求：只传 1 个对象，包含 name / pageNum / pageSize
     const params = {
       name: query.name,
       pageNum: pagination.pageNum,
       pageSize: pagination.pageSize
     }
     console.log('请求参数：', params);
-    console.log(typeof params.pageNum === 'number')
 
     const res = await getElderList(params)
 
-    // 空值保护：接口返回结构是 { code, message, data: { records: [...] } }
-    elderList.value = res?.data?.records ?? []
+    if (res?.data) {
+      elderList.value = res.data.records ?? []
+      pagination.total = res.data.total ?? 0
+    } else {
+      elderList.value = []
+      pagination.total = 0
+    }
   } catch (error) {
     console.error('获取长辈列表失败：', error)
     ElMessage.error('获取列表失败，请稍后重试')
     elderList.value = []
+    pagination.total = 0
   } finally {
     loading.value = false
   }
+}
+
+//  翻页事件处理
+function handleSizeChange() {
+  pagination.pageNum = 1 // 切换每页条数时回到第一页
+  getList()
+}
+
+function handlePageChange() {
+  console.log('当前页码：', pagination.pageNum); // 调试用，可删除
+  getList()
 }
 
 function openAdd() {
@@ -119,7 +140,7 @@ function openAdd() {
 }
 
 function openEdit(row: ElderItem) {
-  currentId.value = row.elder_id
+  currentId.value = row.elderId
   dialogVisible.value = true
 }
 
@@ -129,13 +150,15 @@ function openDetail(row: ElderItem) {
 }
 
 async function del(row: ElderItem) {
-  await deleteElder(row.elder_id)
+  await deleteElder(row.elderId)
   ElMessage.success('删除成功')
+  pagination.pageNum = 1
   getList()
 }
 
 function resetQuery() {
   query.name = ''
+  pagination.pageNum = 1
   getList()
 }
 </script>
