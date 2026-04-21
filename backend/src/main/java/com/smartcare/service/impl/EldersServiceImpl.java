@@ -10,8 +10,10 @@ import com.smartcare.dto.elder.ElderSaveDto;
 import com.smartcare.dto.elder.ElderUpdateDto;
 import com.smartcare.entity.Elders;
 import com.smartcare.entity.Relations;
+import com.smartcare.entity.Users;
 import com.smartcare.mapper.EldersMapper;
 import com.smartcare.mapper.RelationsMapper;
+import com.smartcare.mapper.UsersMapper;
 import com.smartcare.service.EldersService;
 import com.smartcare.vo.Page.PageVo;
 import com.smartcare.vo.elder.ElderDetailVo;
@@ -31,6 +33,7 @@ public class EldersServiceImpl implements EldersService {
 
     private final EldersMapper eldersMapper;
     private final RelationsMapper relationsMapper;
+    private final UsersMapper usersMapper;
 
     @Override
     public PageVo<ElderListVo> list(ElderQueryDto dto) {
@@ -66,19 +69,74 @@ public class EldersServiceImpl implements EldersService {
             throw new BusinessException(ResultCodeEnum.ELDER_NAME_EMPTY);
         }
 
+        // 保存老人基本信息
         Elders elder = new Elders();
         BeanUtils.copyProperties(dto, elder);
         eldersMapper.insert(elder);
 
-        if (dto.getRelatives() != null && !dto.getRelatives().isEmpty()) {
-            for (ElderRelativeDto relativeDto : dto.getRelatives()) {
-                Relations relation = new Relations();
-                relation.setElderId(elder.getElderId());
-                relation.setUserId(relativeDto.getUserId());
-                relation.setRelationship(relativeDto.getRelationship());
-                relationsMapper.insert(relation);
-            }
+        // 保存联系人1（和修改接口逻辑一模一样）
+        saveSingleContact(
+                elder.getElderId(),
+                dto.getFamilyContact1(),
+                dto.getFamilyPhone1(),
+                "联系人1"
+        );
+
+        // 保存联系人2
+        saveSingleContact(
+                elder.getElderId(),
+                dto.getFamilyContact2(),
+                dto.getFamilyPhone2(),
+                "联系人2"
+        );
+    }
+
+    /**
+     * 保存单个联系人
+     */
+    private void saveSingleContact(Long elderId, String contactName, String phone, String relationship) {
+        boolean nameEmpty = contactName == null || contactName.trim().isEmpty();
+        boolean phoneEmpty = phone == null || phone.trim().isEmpty();
+
+        // 都没填，直接跳过
+        if (nameEmpty && phoneEmpty) {
+            return;
         }
+
+        // 一个填了一个没填，报参数错误
+        if (nameEmpty || phoneEmpty) {
+            throw new BusinessException(ResultCodeEnum.PARAM_ERROR, relationship + "姓名和手机号必须同时填写");
+        }
+
+        // 按手机号查用户
+        Users user = usersMapper.selectOne(
+                new LambdaQueryWrapper<Users>()
+                        .eq(Users::getPhone, phone)
+                        .last("limit 1")
+        );
+
+        if (user == null) {
+            // 不能使用全参构造器，必须 new + set
+            user = new Users();
+            user.setRealName(contactName);
+            user.setPhone(phone);
+            user.setUsername(phone);
+            user.setPassword("123456");
+            user.setUserType((byte) 2);
+            user.setStatus((byte) 1);
+            usersMapper.insert(user);
+        } else {
+            // 已存在则同步更新联系人姓名
+            user.setRealName(contactName);
+            usersMapper.updateById(user);
+        }
+
+        // 保存 relation
+        Relations relation = new Relations();
+        relation.setElderId(elderId);
+        relation.setUserId(user.getUserId());
+        relation.setRelationship(relationship);
+        relationsMapper.insert(relation);
     }
 
     @Override
@@ -89,23 +147,35 @@ public class EldersServiceImpl implements EldersService {
             throw new BusinessException(ResultCodeEnum.ELDER_NOT_EXIST);
         }
 
-        BeanUtils.copyProperties(dto, elder);
+        // 更新老人基本信息
+        elder.setName(dto.getName());
+        elder.setAge(dto.getAge());
+        elder.setGender(dto.getGender());
+        elder.setAddress(dto.getAddress());
+        elder.setHealthNotes(dto.getPhysicalNotes());
         eldersMapper.updateById(elder);
 
+        // 删除原有联系人关系
         relationsMapper.delete(
                 new LambdaQueryWrapper<Relations>()
                         .eq(Relations::getElderId, dto.getElderId())
         );
 
-        if (dto.getRelatives() != null && !dto.getRelatives().isEmpty()) {
-            for (ElderRelativeDto relativeDto : dto.getRelatives()) {
-                Relations relation = new Relations();
-                relation.setElderId(dto.getElderId());
-                relation.setUserId(relativeDto.getUserId());
-                relation.setRelationship(relativeDto.getRelationship());
-                relationsMapper.insert(relation);
-            }
-        }
+        // 重新保存联系人1
+        saveSingleContact(
+                dto.getElderId(),
+                dto.getFamilyContact1(),
+                dto.getFamilyPhone1(),
+                "联系人1"
+        );
+
+        // 重新保存联系人2
+        saveSingleContact(
+                dto.getElderId(),
+                dto.getFamilyContact2(),
+                dto.getFamilyPhone2(),
+                "联系人2"
+        );
     }
 
     @Override
