@@ -35,6 +35,21 @@ public class AlertLogsServiceImpl implements AlertLogsService {
             wrapper.eq(AlertLogs::getSendStatus, dto.getSendStatus());
         }
 
+        if (dto.getSendMethod() != null) {
+            wrapper.eq(AlertLogs::getSendMethod, dto.getSendMethod());
+        }
+
+        if (dto.getRecipientType() != null) {
+            wrapper.eq(AlertLogs::getRecipientType, dto.getRecipientType());
+        }
+
+        if (dto.getStartTime() != null) {
+            wrapper.ge(AlertLogs::getSentAt, dto.getStartTime());
+        }
+        if (dto.getEndTime() != null) {
+            wrapper.le(AlertLogs::getSentAt, dto.getEndTime());
+        }
+
         wrapper.orderByDesc(AlertLogs::getAlertId);
 
         Page<AlertLogs> page = new Page<>(dto.getPageNum(), dto.getPageSize());
@@ -76,6 +91,10 @@ public class AlertLogsServiceImpl implements AlertLogsService {
         }
 
         log.setSendStatus(dto.getSendStatus());
+        // 新增：接收前端传递的 errorMsg 并更新
+        if (dto.getErrorMsg() != null) {
+            log.setErrorMsg(dto.getErrorMsg());
+        }
         alertLogsMapper.updateById(log);
     }
 
