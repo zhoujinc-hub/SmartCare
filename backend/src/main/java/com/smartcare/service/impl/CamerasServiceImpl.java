@@ -29,9 +29,17 @@ public class CamerasServiceImpl implements CamerasService {
     public PageVo<CameraVo> list(CameraQueryDto dto) {
         LambdaQueryWrapper<Cameras> wrapper = new LambdaQueryWrapper<>();
 
+        // 设备名称：没填就不加条件
         if (dto.getCameraName() != null && !dto.getCameraName().trim().isEmpty()) {
-            wrapper.like(Cameras::getCameraName, dto.getCameraName());
+            wrapper.like(Cameras::getCameraName, dto.getCameraName().trim());
         }
+
+        // 摄像头类型：没选就不加条件
+        if (dto.getCameraType() != null) {
+            wrapper.eq(Cameras::getCameraType, dto.getCameraType());
+        }
+
+        // 设备状态：没选就不加条件
         if (dto.getStatus() != null) {
             wrapper.eq(Cameras::getStatus, dto.getStatus());
         }
