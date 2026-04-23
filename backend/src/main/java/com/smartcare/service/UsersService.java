@@ -1,17 +1,13 @@
 package com.smartcare.service;
 
-import com.smartcare.dto.user.LoginDto;
-import com.smartcare.dto.user.ResetPasswordDto;
-import com.smartcare.vo.user.LoginVo;
-import com.smartcare.vo.user.UserSimpleVo;
-
-import java.util.List;
+import com.smartcare.dto.user.RegisterDto;
+import com.smartcare.dto.user.ResetPasswordRequestDto;
 
 public interface UsersService {
 
-    LoginVo login(LoginDto dto);
+    void sendCode(String phone);
 
-    void resetPassword(ResetPasswordDto dto);
+    void register(RegisterDto dto);
 
-
+    void resetPasswordByPhone(ResetPasswordRequestDto dto);
 }
