@@ -23,7 +23,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, defineEmits, computed } from 'vue'
+import { computed } from 'vue'
 import type { FallEventQueryParams } from '@/types/fallEvent'
 
 const props = defineProps<{

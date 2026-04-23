@@ -19,7 +19,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, defineEmits, computed, reactive } from 'vue'
+import {  computed, reactive } from 'vue'
 import { ElMessage } from 'element-plus'
 import { handleFallEvent, saveFallEventNotes } from '@/api/fallEvent'
 
