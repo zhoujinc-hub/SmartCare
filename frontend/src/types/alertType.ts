@@ -61,7 +61,6 @@ export interface AlertLog {
 
 /** 告警列表查询参数 */
 export interface AlertQueryParams {
-    page?: number;
     pageNum: number;
     pageSize: number;
     sendStatus?: 0 | 1 | 2;
