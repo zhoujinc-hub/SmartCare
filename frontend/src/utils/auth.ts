@@ -29,8 +29,8 @@ export const getUserInfo = (): LocalUserInfo | null => {
 }
 
 // 记住用户（账号+用户类型）
-export const setRememberUser = (username: string, userType: number) => {
-    localStorage.setItem(REMEMBER_USER_KEY, JSON.stringify({ username, userType }))
+export const setRememberUser = (user: { username: string, userType: number }) => {
+    localStorage.setItem(REMEMBER_USER_KEY, JSON.stringify(user))
 }
 
 // 获取记住的用户信息

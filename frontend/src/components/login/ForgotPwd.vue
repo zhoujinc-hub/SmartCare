@@ -92,7 +92,6 @@ const rules: FormRules = {
   ]
 }
 
-// ✅ 修复：直接使用类型断言，避免和 request.ts 的响应拦截器冲突
 const sendCode = async () => {
   if (!/^1[3-9]\d{9}$/.test(form.phone)) {
     ElMessage.warning('请输入正确的手机号')

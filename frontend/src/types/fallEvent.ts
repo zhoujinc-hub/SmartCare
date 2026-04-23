@@ -1,47 +1,66 @@
-// 跌倒事件查询参数
+// 查询参数
 export interface FallEventQueryParams {
     elderName?: string
     status?: number
     cameraId?: number
-    pageNum: number
-    pageSize: number
+    pageNum?: number
+    pageSize?: number
 }
 
-// 处理跌倒事件的请求体
-export interface FallEventHandleData {
+// 处理事件
+export interface FallEventHandleDto {
     processedBy?: number
-    status?: number
 }
 
-// 保存处理备注的请求体
-export interface FallEventNotesData {
-    processNotes: string
+// 保存备注
+export interface FallEventNotesDto {
+    processNotes?: string
 }
 
-// 跌倒事件列表项（可选，给组件使用）
-export interface FallEventItem {
+// 列表项
+export interface FallEventVo {
     eventId: number
     cameraId: number
     elderId?: number
     elderName?: string
-    isRegistered: 0 | 1
+    isRegistered: number
     fallTime: string
     detectTime: string
     videoPath?: string
     screenshotPath?: string
     confidence?: number
-    status: 1 | 2 | 3 // 1:待处理 2:已处理 3:误报
+    status: number
     processedBy?: number
     processedAt?: string
     processNotes?: string
 }
 
-// 列表接口响应结构
+// 分页响应
+export interface PageVo<T> {
+    total: number
+    pages: number
+    pageNum: number
+    pageSize: number
+    records: T[]
+}
+
+// 列表响应
 export interface FallEventListResponse {
     code: number
     message: string
-    data: {
-        list: FallEventItem[]
-        total: number
-    }
+    data: PageVo<FallEventVo>
+}
+
+// 详情
+export interface FallEventDetailResponse {
+    code: number
+    message: string
+    data: FallEventVo
+}
+
+// 通用
+export interface FallEventBaseResponse {
+    code: number
+    message: string
+    data?: any
 }

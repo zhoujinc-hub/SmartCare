@@ -1,63 +1,58 @@
 <template>
   <div class="alert-list-page">
     <div class="page-header mb-4">
-      <h2>告警日志管理</h2>
     </div>
 
-    <!-- 筛选组件 -->
     <alert-filter />
 
-    <!-- 表格组件 -->
     <alert-table
-      :alert-list="alertList"
-      :loading="loading"
-      :page="pagination.page"
-      :size="pagination.size"
-      :total="pagination.total"
-      @detail="handleDetail"
-      @refresh="fetchList"
+        :alert-list="alertStore.alertList"
+        :loading="alertStore.loading"
+        :page="alertStore.pagination.pageNum"
+        :size="alertStore.pagination.pageSize"
+        :total="alertStore.pagination.total"
+        @detail="handleDetail"
+        @refresh="fetchList"
+        @update:page="alertStore.changePage"
+        @update:size="alertStore.changeSize"
     />
 
-    <!-- 详情弹窗 -->
     <alert-detail
-      v-model:visible="detailDialogVisible"
-      :alert-id="currentAlertId"
+        v-model:visible="detailDialogVisible"
+        :alert-id="currentAlertId"
     />
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
-import { useAlertStore } from '@/stores/alertStore';
-import AlertFilter from '@/components/alerts/AlertFilter.vue';
-import AlertTable from '@/components/alerts/AlertTable.vue';
-import AlertDetail from '@/components/alerts/AlertDetail.vue';
-import type { AlertLog } from '@/types/alertType';
+// ✅ 正确导入所有需要的 API
+import { ref, onMounted } from 'vue'
+import { useAlertStore } from '@/stores/alertStore'
+import AlertFilter from '@/components/alerts/AlertFilter.vue'
+import AlertTable from '@/components/alerts/AlertTable.vue'
+import AlertDetail from '@/components/alerts/AlertDetail.vue'
+import type { AlertLog } from '@/types/alertType'
 
-const alertStore = useAlertStore();
+const alertStore = useAlertStore()
 
-// 解构store状态
-const { alertList, pagination, loading, fetchAlertList } = alertStore;
+const detailDialogVisible = ref(false)
+const currentAlertId = ref<bigint | null>(null)
 
-// 详情弹窗
-const detailDialogVisible = ref(false);
-const currentAlertId = ref<bigint | null>(null);
-
-/** 页面挂载时加载列表 */
+// 页面加载请求数据
 onMounted(() => {
-  fetchAlertList(true);
-});
+  alertStore.fetchAlertList(true)
+})
 
-/** 刷新列表 */
+// 刷新列表
 const fetchList = () => {
-  fetchAlertList(false);
-};
+  alertStore.fetchAlertList(false)
+}
 
-/** 查看详情 */
+// 查看详情
 const handleDetail = (alert: AlertLog) => {
-  currentAlertId.value = alert.alert_id;
-  detailDialogVisible.value = true;
-};
+  currentAlertId.value = alert.alertId
+  detailDialogVisible.value = true
+}
 </script>
 
 <style scoped>

@@ -53,6 +53,11 @@
         登录系统
       </el-button>
     </el-form-item>
+
+    <div class="register-row">
+      <span>还没有账号？</span>
+      <el-button type="text" @click="goRegister" class="register-btn">立即注册</el-button>
+    </div>
   </el-form>
 </template>
 
@@ -60,7 +65,7 @@
 import { ref, reactive } from 'vue'
 import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
 import { Loading } from '@element-plus/icons-vue'
-import type { LoginForm, LoginResponse } from '@/types/user'
+import type { LoginForm } from '@/types/user'
 import { userLogin } from '@/api/user'
 import { setToken, setUserInfo, setRememberUser, clearRememberUser } from '@/utils/auth'
 
@@ -76,7 +81,11 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['login-success', 'forgot-pwd'])
+const emit = defineEmits<{
+  'login-success': [userType: number]
+  'forgot-pwd': []
+  'register': []
+}>()
 
 const formRef = ref<FormInstance>()
 const loading = ref(false)
@@ -99,28 +108,29 @@ const onLogin = async () => {
     const { username, password, userType } = form
     const response = await userLogin({ username, password, userType })
 
-    console.log("后端原始响应:", response)
-
-    // 防御：如果 response.data 是 null，直接报错
     if (!response.data) {
-      ElMessage.error("登录失败：服务器未返回有效数据")
+      ElMessage.error('登录失败：服务器未返回有效数据')
       return
     }
 
     const userInfo = response.data as any
-    console.log("用户信息:", userInfo)
-
     if (userInfo.token) {
       setToken(userInfo.token)
       setUserInfo(userInfo)
-      ElMessage.success("登录成功！")
+      ElMessage.success('登录成功！')
       emit('login-success', userType)
+
+      if (form.rememberMe) {
+        setRememberUser({ username, userType })
+      } else {
+        clearRememberUser()
+      }
     } else {
-      ElMessage.error("登录失败：服务器未返回 token")
+      ElMessage.error('登录失败：未返回token')
     }
   } catch (err) {
     console.error(err)
-    ElMessage.error("网络异常")
+    ElMessage.error('网络异常')
   } finally {
     loading.value = false
   }
@@ -128,6 +138,10 @@ const onLogin = async () => {
 
 const onForgotPwd = () => {
   emit('forgot-pwd')
+}
+
+const goRegister = () => {
+  emit('register')
 }
 
 defineExpose({
@@ -170,5 +184,15 @@ defineExpose({
 @keyframes spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
+}
+
+.register-row {
+  margin-top: 8px;
+  font-size: 14px;
+  color: #666;
+}
+.register-btn {
+  padding: 0 4px;
+  color: #409eff;
 }
 </style>

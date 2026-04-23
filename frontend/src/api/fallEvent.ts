@@ -1,51 +1,43 @@
 import request from '@/utils/request'
+// 只保留导入，删除文件里重复的interface定义
+import type {
+    FallEventQueryParams,
+    FallEventHandleDto,
+    FallEventNotesDto,
+    FallEventVo,
+    PageVo,
+    FallEventListResponse,
+    FallEventDetailResponse,
+    FallEventBaseResponse
+} from '@/types/fallEvent'
 
-// 查询参数类型
-interface FallEventQuery {
-    elderName?: string
-    cameraId?: number
-    status?: number
-    pageNum: number
-    pageSize: number
-}
-
-// 处理事件参数
-interface HandleEventData {
-    status: number
-    processNotes?: string
-}
-
-// 获取跌倒事件列表
-export function getFallEventList(data: FallEventQuery) {
+export function getFallEventList(data: FallEventQueryParams): Promise<FallEventListResponse> {
     return request({
         url: '/fallEvents/list',
-        method: 'post',
+        method: 'POST',
         data
     })
 }
 
-// 获取详情
-export function getFallEventDetail(eventId: number) {
+export function getFallEventDetail(eventId: number): Promise<FallEventDetailResponse> {
     return request({
         url: `/fallEvents/detail/${eventId}`,
-        method: 'get'
+        method: 'GET'
     })
 }
 
-// 处理事件
-export function handleFallEvent(eventId: number, data: HandleEventData) {
+export function handleFallEvent(eventId: number, data: FallEventHandleDto): Promise<FallEventBaseResponse> {
     return request({
         url: `/fallEvents/handle/${eventId}`,
-        method: 'put',
+        method: 'PUT',
         data
     })
 }
 
-// 添加备注
-export function saveFallEventNotes(eventId: number, processNotes: string) {
+export function saveFallEventNotes(eventId: number, data: FallEventNotesDto): Promise<FallEventBaseResponse> {
     return request({
         url: `/fallEvents/notes/${eventId}`,
-        method: 'put',
-        data: { processNotes }
+        method: 'PUT',
+        data
     })
 }

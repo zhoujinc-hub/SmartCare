@@ -17,8 +17,8 @@
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { handleAlert } from '@/api/alertApi'
 import type { AlertLog } from '@/types/alertType'
+import { ArrowDown } from '@element-plus/icons-vue'
 
-// 正确写法：setup 语法糖自带，无需导入
 const props = defineProps<{
   alert: AlertLog
 }>()
@@ -28,22 +28,22 @@ const emit = defineEmits<{
 }>()
 
 const handleCommand = async (command: string) => {
-  const status = Number(command) as 1 | 2 | 3
+  const sendStatus = Number(command) as 0 | 1 | 2
   try {
-    const { value: process_notes } = await ElMessageBox.prompt(
-      '请输入处理备注',
-      '处理摔倒事件',
-      {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        inputPlaceholder: '如：已联系家属，老人无大碍...'
-      }
+    const { value: errorMsg } = await ElMessageBox.prompt(
+        '请输入处理备注',
+        '处理摔倒事件',
+        {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          inputPlaceholder: '如：已联系家属，老人无大碍...'
+        }
     )
 
     await handleAlert({
-      alert_id: props.alert.alert_id,
-      status,
-      process_notes
+      alertId: props.alert.alertId,       // 告警ID
+      sendStatus: sendStatus,             // 发送状态
+      errorMsg: errorMsg                  // 错误信息/备注
     })
 
     ElMessage.success('处理成功！')

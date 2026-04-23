@@ -5,8 +5,8 @@ import type { AlertQueryParams,HandleAlertParams } from '@/types/alertType';
 export function getAlertList(params: AlertQueryParams) {
   return request({
     url: '/alertLogs/list',
-    method: 'get',
-    params
+      method: 'post',
+      data: params
   });
 }
 

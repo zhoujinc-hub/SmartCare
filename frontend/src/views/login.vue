@@ -11,35 +11,44 @@
       </div>
 
       <LoginForm
-        :init-form="initLoginForm"
-        @login-success="handleLoginSuccess"
-        @forgot-pwd="handleForgotPwd"
-        ref="loginFormRef"
+          :init-form="initLoginForm"
+          @login-success="handleLoginSuccess"
+          @forgot-pwd="handleForgotPwd"
+          ref="loginFormRef"
+          @register="handleOpenRegister"
       />
 
       <div class="login-footer">
         <p>© 2026 智慧社区养老监护系统 版权所有</p>
       </div>
     </el-card>
-  </div>
 
-  <ForgotPwd
-    v-model="forgotPwdVisible"
-    @reset-success="handleResetSuccess"
-  />
+    <ForgotPwd
+        v-model="forgotPwdVisible"
+        @reset-success="handleResetSuccess"
+    />
+
+    <RegisterForm
+        v-model="registerVisible"
+        @register-success="handleRegisterSuccess"
+    />
+  </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
 import { House } from '@element-plus/icons-vue'
 import LoginForm from '@/components/login/LoginForm.vue'
 import ForgotPwd from '@/components/login/ForgotPwd.vue'
+import RegisterForm from '@/components/login/RegisterForm.vue'
 import { getRememberUser } from '@/utils/auth'
 import type { LoginForm as LoginFormType } from '@/types/user'
 
 const router = useRouter()
 const forgotPwdVisible = ref(false)
+const registerVisible = ref(false)
 const loginFormRef = ref<InstanceType<typeof LoginForm>>()
 
 const initLoginForm = ref<LoginFormType>({
@@ -54,16 +63,16 @@ onMounted(() => {
   initLoginForm.value = {
     username: rememberUser.username,
     password: '',
-    userType: rememberUser.userType,
+    userType: rememberUser.userType || 2,
     rememberMe: !!rememberUser.username
   }
 })
 
 const handleLoginSuccess = (userType: number) => {
   if (userType === 1) {
-    router.push('/dashboard') // 管理员
+    router.push('/dashboard')
   } else {
-    router.push('/fallEvent')  // 家属 → 跌倒页面
+    router.push('/fallEvent')
   }
 }
 
@@ -73,6 +82,15 @@ const handleForgotPwd = () => {
 
 const handleResetSuccess = () => {
   loginFormRef.value?.resetForm()
+}
+
+const handleOpenRegister = () => {
+  registerVisible.value = true
+}
+
+const handleRegisterSuccess = () => {
+  ElMessage.success('注册成功，请登录！')
+  registerVisible.value = false
 }
 </script>
 

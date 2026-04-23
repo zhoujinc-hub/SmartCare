@@ -1,5 +1,13 @@
 import request from '@/utils/request'
-import type { LoginForm, LoginResponse, ForgotForm, CodeResponse, ResetPwdResponse } from '@/types/user'
+import type {
+    LoginForm,
+    LoginResponse,
+    ForgotForm,
+    CodeResponse,
+    ResetPwdResponse,
+    RegisterForm,
+    RegisterResponse
+} from '@/types/user'
 
 export const userLogin = (data: Omit<LoginForm, 'rememberMe'>) => {
     return request<LoginResponse>({
@@ -30,5 +38,13 @@ export const resetUserPassword = (data: Omit<ForgotForm, 'confirmPassword'>) => 
             code: data.code,
             new_password: data.newPassword
         }
+    }).then(res => res.data)
+}
+
+export const registerUser = (data: Omit<RegisterForm, 'confirmPassword'>) => {
+    return request<RegisterResponse>({
+        url: '/user/register',
+        method: 'POST',
+        data
     }).then(res => res.data)
 }
