@@ -15,5 +15,5 @@ export interface ElderItem {
 
 export interface ElderDetailItem extends ElderItem {}
 
-export interface ElderFormData extends Omit<ElderItem, 'elderI d' | 'created_at'> {}
+export interface ElderFormData extends Omit<ElderItem, 'elderId' | 'created_at'> {}
 

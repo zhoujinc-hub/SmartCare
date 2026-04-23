@@ -75,7 +75,7 @@ import { ElMessage } from 'element-plus'
 import { Search, Plus } from '@element-plus/icons-vue'
 import ElderForm from "@/components/elders/ElderForm.vue";
 import ElderDetail from "@/components/elders/ElderDetail.vue";
-import { getElderList, deleteElder } from '@/api/elder'
+import { getElderList, deleteElder,getElderDetail  } from '@/api/elder'
 import type { ElderItem } from '@/types/elder'
 
 const loading = ref(false)
@@ -123,6 +123,24 @@ async function getList() {
   }
 }
 
+async function openDetail(row: ElderItem) {
+  try {
+    // 1. 发起详情接口请求
+    const res = await getElderDetail(row.elderId)
+    if (res?.data) {
+      // 2. 给详情数据赋值
+      detailData.value = res.data
+      // 3. 打开弹窗
+      detailVisible.value = true
+    } else {
+      ElMessage.error('获取详情失败')
+    }
+  } catch (error) {
+    console.error('获取老人详情失败：', error)
+    ElMessage.error('获取详情失败，请稍后重试')
+  }
+}
+
 //  翻页事件处理
 function handleSizeChange() {
   pagination.pageNum = 1 // 切换每页条数时回到第一页
@@ -139,15 +157,18 @@ function openAdd() {
   dialogVisible.value = true
 }
 
-function openEdit(row: ElderItem) {
-  currentId.value = row.elderId
-  dialogVisible.value = true
+async function openEdit(row: ElderItem) {
+  try {
+    const res = await getElderDetail(row.elderId)
+    if (res?.data) {
+      currentId.value = row.elderId
+      dialogVisible.value = true
+    }
+  } catch (e) {
+    ElMessage.error('获取编辑数据失败')
+  }
 }
 
-function openDetail(row: ElderItem) {
-  detailData.value = row
-  detailVisible.value = true
-}
 
 async function del(row: ElderItem) {
   await deleteElder(row.elderId)

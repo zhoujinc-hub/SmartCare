@@ -8,8 +8,8 @@
       <el-descriptions-item label="家庭地址">{{ data?.address || '-' }}</el-descriptions-item>
       <el-descriptions-item label="家属联系人1">{{ data?.familyContact1 || '-' }}</el-descriptions-item>
       <el-descriptions-item label="电话1">{{ data?.familyPhone1 || '-' }}</el-descriptions-item>
-      <el-descriptions-item label="家属联系人2">{{ data?.familyContact2 || '无' }}</el-descriptions-item>
-      <el-descriptions-item label="电话2">{{ data?.familyPhone2 || '无' }}</el-descriptions-item>
+      <el-descriptions-item label="家属联系人2">{{ data?.familyContact2 || '-' }}</el-descriptions-item>
+      <el-descriptions-item label="电话2">{{ data?.familyPhone2 || '-' }}</el-descriptions-item>
       <el-descriptions-item label="创建时间">{{ data?.createdAt || '-' }}</el-descriptions-item>
     </el-descriptions>
   </el-dialog>

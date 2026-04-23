@@ -1,109 +1,60 @@
-import request from '../utils/request';
-import type { 
-  CameraItem, 
-  CameraFormData, 
-  HouseholdItem,
-  PageResponse,
-  BaseResponse
-} from '../types/camera';
+import request from '@/utils/request';
+import type {
+    CameraQueryParams,
+    CameraPageResponse,
+    CameraDetailResponse,
+    CameraAddDto,
+    CameraUpdateDto,
+    CameraBaseResponse
+} from '@/types/camera';
 
-/**
- * 获取摄像头列表（分页+筛选）
- */
-export const getCameraList = async (
-  params: {
-    cameraName: string;
-    status: number | '';
-    householdId: number | '';
-    pageNum: number;
-    pageSize: number;
-  }
-): Promise<PageResponse<CameraItem>> => {
-  return request({
-    url: '/cameras/list',
-    method: 'GET',
-    params
-  });
-};
+// 获取摄像头分页列表
+export function getCameraList(params: CameraQueryParams) {
+    return request({
+        url: '/cameras/list',
+        method: 'get',
+        params
+    });
+}
 
+// 获取摄像头详情
+export function getCameraDetail(cameraId: number) {
+    return request({
+        url: `/cameras/detail/${cameraId}`,
+        method: 'get'
+    });
+}
 
-/**
- * 新增摄像头
- */
-export const addCamera = async (formData: CameraFormData): Promise<BaseResponse> => {
-  const cameraData = {
-    camera_type: formData.camera_type,
-    camera_name: formData.camera_name,
-    device_serial: formData.device_serial,
-    stream_url: formData.stream_url,
-    location_desc: formData.location_desc,
-    latitude: formData.latitude,
-    longitude: formData.longitude,
-    status: formData.status
-  };
-  return request({
-    url: '/cameras/add',
-    method: 'POST',
-    data: {
-      ...cameraData,
-      householdId: formData.householdId,
-      remark: formData.remark
-    }
-  });
-};
+// 新增摄像头
+export function addCamera(data: CameraAddDto) {
+    return request({
+        url: '/cameras/add',
+        method: 'post',
+        data
+    });
+}
 
-/**
- * 编辑摄像头
- */
-export const updateCamera = async (formData: CameraFormData): Promise<BaseResponse> => {
-  const cameraData = {
-    camera_id: formData.camera_id,
-    camera_type: formData.camera_type,
-    camera_name: formData.camera_name,
-    device_serial: formData.device_serial,
-    stream_url: formData.stream_url,
-    location_desc: formData.location_desc,
-    latitude: formData.latitude,
-    longitude: formData.longitude,
-    status: formData.status
-  };
-  return request({
-    url: '/cameras/update',
-    method: 'PUT',
-    data: {
-      ...cameraData,
-      householdId: formData.householdId,
-      remark: formData.remark
-    }
-  });
-};
+// 修改摄像头
+export function updateCamera(data: CameraUpdateDto) {
+    return request({
+        url: '/cameras/update',
+        method: 'put',
+        data
+    });
+}
 
-/**
- * 删除摄像头
- */
-export const deleteCamera = async (cameraId: number): Promise<BaseResponse> => {
-  return request({
-    url: `/cameras/delete/${cameraId}`,
-    method: 'DELETE'
-  });
-};
+// 删除摄像头
+export function deleteCamera(cameraId: number) {
+    return request({
+        url: `/cameras/delete/${cameraId}`,
+        method: 'delete'
+    });
+}
 
-/**
- * 获取摄像头详情
- */
-export const getCameraDetail = async (cameraId: number): Promise<BaseResponse & { data: CameraItem }> => {
-  return request({
-    url: `/cameras/detail/${cameraId}`,
-    method: 'GET'
-  });
-};
-
-/**
- * 刷新摄像头状态
- */
-export const refreshCameraStatus = async (): Promise<BaseResponse> => {
-  return request({
-    url: '/cameras/refreshStatus',
-    method: 'POST'
-  });
-};
+// 刷新状态
+export function refreshCameraStatus() {
+    return request({
+        url: '/cameras/refreshStatus',
+        method: 'post'
+    });
+}

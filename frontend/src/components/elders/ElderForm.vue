@@ -70,7 +70,7 @@ const emit = defineEmits<{
 }>()
 
 const dialogVisible = ref(false)
-const formRef = ref()
+const formRef = ref<any>(null)
 const form = ref<ElderItem>({
   elderId: 0,
   name: '',
@@ -81,7 +81,7 @@ const form = ref<ElderItem>({
   familyPhone1: '',
   familyContact2: '',
   familyPhone2: '',
-  healthNotes: null,
+  healthNotes: '',
   createdAt: ''
 })
 
@@ -91,45 +91,64 @@ const rules = {
   gender: [{ required: true, message: '请选择性别', trigger: 'change' }]
 }
 
+// 监听弹窗打开 → 编辑时自动回填数据
 watch(() => props.modelValue, async (val) => {
   dialogVisible.value = val
-  if (val && props.elderId) {
-    try {
-      const res = await getElderDetail(props.elderId)
-      form.value = { ...res.data }
-    } catch {
-      ElMessage.error('加载详情失败')
-    }
-  }
-  if (!val) {
-    form.value = {
-      elderId: 0,
-      name: '',
-      gender: 0,
-      age: 0,
-      address: '',
-      familyContact1: '',
-      familyPhone1: '',
-      familyContact2: '',
-      familyPhone2: '',
-      healthNotes: null,
-      createdAt: ''
+
+  if (val) {
+    if (props.elderId && props.elderId > 0) {
+      try {
+        const res = await getElderDetail(props.elderId)
+        if (res?.data) {
+          form.value = { ...res.data }
+        }
+      } catch {
+        ElMessage.error('加载详情失败')
+      }
+    } else {
+      resetForm()
     }
   }
 }, { immediate: true })
 
-watch(() => dialogVisible.value, (val) => emit('update:modelValue', val))
+// 关闭弹窗清空表单
+watch(() => dialogVisible.value, (val) => {
+  emit('update:modelValue', val)
+  if (!val) {
+    resetForm()
+  }
+})
 
+// 重置表单
+function resetForm() {
+  form.value = {
+    elderId: 0,
+    name: '',
+    gender: 0,
+    age: 0,
+    address: '',
+    familyContact1: '',
+    familyPhone1: '',
+    familyContact2: '',
+    familyPhone2: '',
+    healthNotes: '',
+    createdAt: ''
+  }
+}
+
+// 提交
 async function submit() {
   try {
-    await formRef.value.validate()
-    if (props.elderId) {
+    await formRef.value?.validate()
+
+    if (props.elderId && props.elderId > 0) {
       await updateElder(form.value)
       ElMessage.success('修改成功')
     } else {
       await addElder(form.value)
       ElMessage.success('新增成功')
     }
+
     emit('success')
     dialogVisible.value = false
   } catch {
