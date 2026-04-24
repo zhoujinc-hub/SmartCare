@@ -10,8 +10,8 @@ from .serializers import CollectionSaveSerializer
 #广告接口
 def welcome(request):
     res = Welcome.objects.all().order_by('-order').first()
-    img = request.build_absolute_uri('/media/' + str(res.img))
-    return JsonResponse({'code': 100, 'msg': '成功', 'result': img})
+    img = 'http://192.168.48.216:8000/media/'+str(res.img)
+    return JsonResponse({'code':100,'msg':'成功','result':img})
 #轮播图接口
 class BannerView(GenericViewSet, ListModelMixin):
     queryset = Banner.objects.filter(is_delete=False).order_by('order')[:3]
