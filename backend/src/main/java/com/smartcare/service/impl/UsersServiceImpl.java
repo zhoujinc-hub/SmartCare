@@ -211,7 +211,7 @@ public class UsersServiceImpl implements UsersService {
             String host = "https://gyytz.market.alicloudapi.com";
             String path = "/sms/smsSend";
             String method = "POST";
-            String appcode = "你的AppCode";
+            String appcode = "5dbc03c05611454090ecdc6b17d96d94";
 
             Map<String, String> headers = new HashMap<>();
             headers.put("Authorization", "APPCODE " + appcode);
@@ -222,8 +222,8 @@ public class UsersServiceImpl implements UsersService {
             String paramStr = "**code**:" + verifyCode + ",**minute**:" + CODE_EXPIRE_MINUTE;
             querys.put("param", paramStr);
 
-            querys.put("smsSignId", "你的smsSignId");
-            querys.put("templateId", "你的templateId");
+            querys.put("smsSignId", "2e65b1bb3d054466b82f0c9d125465e2");
+            querys.put("templateId", "908e94ccf08b4476ba6c876d13f084ad");
 
             Map<String, String> bodys = new HashMap<>();
 
