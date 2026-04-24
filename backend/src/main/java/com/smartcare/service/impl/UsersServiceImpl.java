@@ -116,6 +116,10 @@ public class UsersServiceImpl implements UsersService {
             throw new RuntimeException("验证码不能为空");
         }
 
+        if (dto.getRealName() == null || dto.getRealName().trim().isEmpty()) {
+            throw new RuntimeException("真实姓名不能为空");
+        }
+
         // 校验验证码
         checkCode(dto.getPhone(), dto.getCode());
 

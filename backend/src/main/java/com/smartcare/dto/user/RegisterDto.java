@@ -10,4 +10,5 @@ public class RegisterDto {
     private Byte userType;
     private String password;
     private String code;
+    private String realName;
 }
