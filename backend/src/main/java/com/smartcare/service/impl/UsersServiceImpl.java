@@ -1,6 +1,9 @@
 package com.smartcare.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.smartcare.common.ResultCodeEnum;
+import com.smartcare.common.exception.BusinessException;
+import com.smartcare.dto.user.LoginDto;
 import com.smartcare.dto.user.RegisterDto;
 import com.smartcare.dto.user.ResetPasswordRequestDto;
 import com.smartcare.entity.Users;
@@ -8,9 +11,11 @@ import com.smartcare.mapper.UsersMapper;
 import com.smartcare.service.UsersService;
 import com.smartcare.utils.VerifyCodeUtil;
 import com.atguigu.lease.web.app.utils.HttpUtils;
+import com.smartcare.vo.user.LoginVo;
 import lombok.RequiredArgsConstructor;
 import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -31,6 +36,29 @@ public class UsersServiceImpl implements UsersService {
     private static final int CODE_EXPIRE_MINUTE = 1;
 
     private static final String CODE_PREFIX = "user:code:";
+
+    @Override
+    public LoginVo login(LoginDto dto) {
+        LambdaQueryWrapper<Users> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Users::getUsername, dto.getUsername());
+        wrapper.eq(Users::getPassword, dto.getPassword());
+        wrapper.eq(Users::getUserType, dto.getUserType());
+
+        Users user = usersMapper.selectOne(wrapper);
+
+        if (user == null) {
+            throw new BusinessException(ResultCodeEnum.LOGIN_ERROR);
+        }
+
+        if (user.getStatus() == null || user.getStatus() == 0) {
+            throw new BusinessException(ResultCodeEnum.ACCOUNT_DISABLED);
+        }
+
+        LoginVo vo = new LoginVo();
+        BeanUtils.copyProperties(user, vo);
+        vo.setToken("token_" + user.getUserId());
+        return vo;
+    }
 
     // ================== 发送验证码 ==================
     @Override
