@@ -1,9 +1,11 @@
 package com.smartcare.controller;
 
 import com.smartcare.common.Result;
+import com.smartcare.dto.user.LoginDto;
 import com.smartcare.dto.user.RegisterDto;
 import com.smartcare.dto.user.ResetPasswordRequestDto;
 import com.smartcare.service.UsersService;
+import com.smartcare.vo.user.LoginVo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,6 +15,11 @@ import org.springframework.web.bind.annotation.*;
 public class UsersController {
 
     private final UsersService usersService;
+
+    @PostMapping("/login")
+    public Result<LoginVo> login(@RequestBody LoginDto dto) {
+        return Result.ok(usersService.login(dto));
+    }
 
     // 发送验证码
     @PostMapping("/send-code")
