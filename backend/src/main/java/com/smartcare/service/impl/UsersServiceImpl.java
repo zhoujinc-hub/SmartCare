@@ -9,33 +9,34 @@ import com.smartcare.dto.user.ResetPasswordRequestDto;
 import com.smartcare.entity.Users;
 import com.smartcare.mapper.UsersMapper;
 import com.smartcare.service.UsersService;
+import com.smartcare.utils.HttpUtils;
 import com.smartcare.utils.VerifyCodeUtil;
-import com.atguigu.lease.web.app.utils.HttpUtils;
+
 import com.smartcare.vo.user.LoginVo;
 import lombok.RequiredArgsConstructor;
 import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
 import org.springframework.beans.BeanUtils;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 @RequiredArgsConstructor
 public class UsersServiceImpl implements UsersService {
 
     private final UsersMapper usersMapper;
-    private final StringRedisTemplate stringRedisTemplate;
 
-    // true=模拟发送，false=真实短信
-    private static final boolean MOCK_SMS = true;
+    // true = 模拟发送，false = 真实短信
+    private static final boolean MOCK_SMS = false;
 
+    // 验证码有效期，单位：分钟
     private static final int CODE_EXPIRE_MINUTE = 1;
 
-    private static final String CODE_PREFIX = "user:code:";
+    // 不用 Redis，直接存在内存里
+    private static final Map<String, CodeCache> CODE_MAP = new ConcurrentHashMap<>();
 
     @Override
     public LoginVo login(LoginDto dto) {
@@ -77,13 +78,14 @@ public class UsersServiceImpl implements UsersService {
             throw new RuntimeException("短信发送失败");
         }
 
-        // 存入Redis
-        stringRedisTemplate.opsForValue().set(
-                CODE_PREFIX + phone,
-                verifyCode,
-                CODE_EXPIRE_MINUTE,
-                TimeUnit.MINUTES
-        );
+        // 不用 Redis，存入内存
+        long expireTime = System.currentTimeMillis() + CODE_EXPIRE_MINUTE * 60 * 1000L;
+        CODE_MAP.put(phone, new CodeCache(verifyCode, expireTime));
+
+        System.out.println("验证码已保存到内存");
+        System.out.println("手机号：" + phone);
+        System.out.println("验证码：" + verifyCode);
+        System.out.println("有效期：" + CODE_EXPIRE_MINUTE + "分钟");
     }
 
     // ================== 注册 ==================
@@ -117,14 +119,14 @@ public class UsersServiceImpl implements UsersService {
         // 校验验证码
         checkCode(dto.getPhone(), dto.getCode());
 
-        // 查用户名
+        // 查用户名是否存在
         LambdaQueryWrapper<Users> wrapper1 = new LambdaQueryWrapper<>();
         wrapper1.eq(Users::getUsername, dto.getUsername());
         if (usersMapper.selectOne(wrapper1) != null) {
             throw new RuntimeException("账号已存在");
         }
 
-        // 查手机号
+        // 查手机号是否注册
         LambdaQueryWrapper<Users> wrapper2 = new LambdaQueryWrapper<>();
         wrapper2.eq(Users::getPhone, dto.getPhone());
         if (usersMapper.selectOne(wrapper2) != null) {
@@ -136,13 +138,12 @@ public class UsersServiceImpl implements UsersService {
         user.setPhone(dto.getPhone());
         user.setUserType(dto.getUserType());
         user.setPassword(dto.getPassword());
-
-        // ✅ 修复这里
         user.setStatus((byte) 1);
 
         usersMapper.insert(user);
 
-        stringRedisTemplate.delete(CODE_PREFIX + dto.getPhone());
+        // 注册成功后删除验证码
+        CODE_MAP.remove(dto.getPhone());
     }
 
     // ================== 重置密码 ==================
@@ -179,19 +180,25 @@ public class UsersServiceImpl implements UsersService {
         user.setPassword(dto.getNewPassword());
         usersMapper.updateById(user);
 
-        stringRedisTemplate.delete(CODE_PREFIX + dto.getPhone());
+        // 重置成功后删除验证码
+        CODE_MAP.remove(dto.getPhone());
     }
 
     // ================== 校验验证码 ==================
     private void checkCode(String phone, String code) {
 
-        String redisCode = stringRedisTemplate.opsForValue().get(CODE_PREFIX + phone);
+        CodeCache cache = CODE_MAP.get(phone);
 
-        if (redisCode == null) {
+        if (cache == null) {
+            throw new RuntimeException("验证码已过期或未发送");
+        }
+
+        if (System.currentTimeMillis() > cache.getExpireTime()) {
+            CODE_MAP.remove(phone);
             throw new RuntimeException("验证码已过期");
         }
 
-        if (!redisCode.equals(code)) {
+        if (!cache.getCode().equals(code)) {
             throw new RuntimeException("验证码错误");
         }
     }
@@ -203,6 +210,7 @@ public class UsersServiceImpl implements UsersService {
             System.out.println("========== 模拟短信发送 ==========");
             System.out.println("手机号: " + phone);
             System.out.println("验证码: " + verifyCode);
+            System.out.println("有效期: " + CODE_EXPIRE_MINUTE + "分钟");
             System.out.println("================================");
             return true;
         }
@@ -211,6 +219,8 @@ public class UsersServiceImpl implements UsersService {
             String host = "https://gyytz.market.alicloudapi.com";
             String path = "/sms/smsSend";
             String method = "POST";
+
+            // 这里用你自己的 AppCode
             String appcode = "5dbc03c05611454090ecdc6b17d96d94";
 
             Map<String, String> headers = new HashMap<>();
@@ -231,11 +241,33 @@ public class UsersServiceImpl implements UsersService {
             int statusCode = response.getStatusLine().getStatusCode();
             String result = EntityUtils.toString(response.getEntity(), "UTF-8");
 
+            System.out.println("接口状态码 = " + statusCode);
+            System.out.println("接口返回结果 = " + result);
+
             return statusCode == 200 && result.contains("\"code\":\"0\"");
 
         } catch (Exception e) {
             e.printStackTrace();
             return false;
+        }
+    }
+
+    // ================== 内存验证码对象 ==================
+    private static class CodeCache {
+        private final String code;
+        private final long expireTime;
+
+        public CodeCache(String code, long expireTime) {
+            this.code = code;
+            this.expireTime = expireTime;
+        }
+
+        public String getCode() {
+            return code;
+        }
+
+        public long getExpireTime() {
+            return expireTime;
         }
     }
 }
