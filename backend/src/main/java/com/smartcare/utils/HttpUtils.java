@@ -1,4 +1,4 @@
-package com.atguigu.lease.web.app.utils;
+package com.smartcare.utils;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpResponse;
