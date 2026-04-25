@@ -61,9 +61,14 @@ WSGI_APPLICATION = 'mysite.wsgi.application'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 DATABASES = {
+
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'smartcare_db',
+        'USER': 'smartcare_admin',
+        'PASSWORD': 'password',
+        'HOST': '114.215.169.226',
+        'PORT': '3306',
     }
 }
 
