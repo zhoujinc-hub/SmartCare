@@ -3,26 +3,26 @@
     <!-- 左侧导航栏（白色背景） -->
     <el-aside width="200px" style="background-color: #ffffff; color: #333333; border-right: 1px solid #e6e6e6;">
       <el-menu
-        default-active="/dashboard"
-        router
-        background-color="#ffffff"
-        text-color="#333333"
-        active-text-color="#409eff"
-        style="height: 100%; border-right: none;"
+          default-active="/admin/dashboard"
+          router
+          background-color="#ffffff"
+          text-color="#333333"
+          active-text-color="#409eff"
+          style="height: 100%; border-right: none;"
       >
-        <el-menu-item index="/dashboard" style="height: 60px; line-height: 60px;">
+        <el-menu-item index="/admin/dashboard" style="height: 60px; line-height: 60px;">
           <span>综合数据</span>
         </el-menu-item>
-        <el-menu-item index="/alerts" style="height: 60px; line-height: 60px;">
+        <el-menu-item index="/admin/alerts" style="height: 60px; line-height: 60px;">
           <span>告警记录</span>
         </el-menu-item>
-        <el-menu-item index="/elders" style="height: 60px; line-height: 60px;">
+        <el-menu-item index="/admin/elders" style="height: 60px; line-height: 60px;">
           <span>老人管理</span>
         </el-menu-item>
-        <el-menu-item index="/cameras" style="height: 60px; line-height: 60px;">
+        <el-menu-item index="/admin/cameras" style="height: 60px; line-height: 60px;">
           <span>摄像头管理</span>
         </el-menu-item>
-        <el-menu-item index="/fallEvent" style="height: 60px; line-height: 60px;">
+        <el-menu-item index="/admin/fallEvent" style="height: 60px; line-height: 60px;">
           <span>跌倒事件管理</span>
         </el-menu-item>
       </el-menu>

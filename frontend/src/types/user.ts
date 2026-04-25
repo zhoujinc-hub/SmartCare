@@ -8,17 +8,13 @@ export interface LoginForm {
 
 /** 登录接口返回数据类型 */
 export interface LoginResponse {
-    code: number
-    message: string
-    data: {
-        token: string                // 登录令牌
-        userId?: number              // 对应 users.user_id
-        username?: string            // 对应 users.username
-        realName?: string            // 对应 users.real_name
-        phone?: string               // 对应 users.phone
-        userType?: number            // 对应 users.user_type
-        status?: number              // 对应 users.status（0=禁用 1=启用）
-    }
+    userId?: number
+    username?: string
+    realName?: string
+    phone?: string
+    userType?: number
+    status?: number
+    token: string
 }
 
 /** 忘记密码表单类型（对齐 users 表 phone 字段） */
@@ -32,9 +28,9 @@ export interface ForgotForm {
 /** 验证码接口返回类型 */
 export interface CodeResponse {
     code: number
-    message: string
+    message?: string
     data?: {
-        code?: string          // 测试用，生产环境不返回
+        code?: string
     }
 }
 
@@ -103,6 +99,7 @@ export interface RegisterForm {
     userType: number
     password: string
     confirmPassword: string
+    realName: string
 }
 
 export interface RegisterResponse {

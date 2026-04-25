@@ -46,7 +46,7 @@
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
 import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
-import type { ForgotForm, CodeResponse, ResetPwdResponse } from '@/types/user'
+import type { ForgotForm, ResetPwdResponse } from '@/types/user'
 import { sendVerifyCode, resetUserPassword } from '@/api/user'
 
 const props = defineProps<{
@@ -92,48 +92,54 @@ const rules: FormRules = {
   ]
 }
 
+// 发送验证码
 const sendCode = async () => {
   if (!/^1[3-9]\d{9}$/.test(form.phone)) {
     ElMessage.warning('请输入正确的手机号')
     return
   }
   try {
-    // 用 unknown 中转，避免类型冲突
-    const res = await sendVerifyCode(form.phone) as unknown as CodeResponse
+    const res: any = await sendVerifyCode(form.phone)
+    console.log('sendVerifyCode返回:', res)
     if (res.code === 200) {
-      ElMessage.success('验证码已发送至您的手机')
+      ElMessage.success('验证码已发送')
       countdown.value = 60
       const timer = setInterval(() => {
         countdown.value--
         if (countdown.value <= 0) clearInterval(timer)
       }, 1000)
     } else {
-      ElMessage.error(res.message || '验证码发送失败')
+      ElMessage.error(res.message || '发送失败')
     }
   } catch (error) {
-    console.error(error)
-    ElMessage.error('网络异常，验证码发送失败')
+    console.error('sendVerifyCode异常:', error)
+    ElMessage.error('网络异常')
   }
 }
 
+// 重置密码
 const resetPassword = async () => {
   try {
     await formRef.value?.validate()
-    const res = await resetUserPassword({
+    const params = {
       phone: form.phone,
       code: form.code,
       newPassword: form.newPassword
-    }) as unknown as ResetPwdResponse
+    }
+    console.log('resetPassword请求参数:', params)
+    const res = await resetUserPassword(params) as unknown as ResetPwdResponse
+    console.log('resetPassword返回:', res)
 
     if (res.code === 200) {
       ElMessage.success('密码重置成功，请重新登录')
       emit('update:modelValue', false)
       emit('reset-success')
+      handleClose()
     } else {
       ElMessage.error(res.message || '密码重置失败')
     }
   } catch (error) {
-    console.error(error)
+    console.error('resetPassword异常:', error)
     ElMessage.error('网络异常，密码重置失败')
   }
 }
