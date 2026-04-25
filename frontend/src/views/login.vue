@@ -70,9 +70,11 @@ onMounted(() => {
 
 const handleLoginSuccess = (userType: number) => {
   if (userType === 1) {
-    router.push('/dashboard')
+    // 管理员：跳转到管理后台
+    router.push('/admin/dashboard')
   } else {
-    router.push('/fallEvent')
+    // 家属：跳转到家属页面
+    router.push('/userweb')
   }
 }
 
