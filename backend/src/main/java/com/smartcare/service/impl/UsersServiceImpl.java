@@ -139,6 +139,7 @@ public class UsersServiceImpl implements UsersService {
 
         Users user = new Users();
         user.setUsername(dto.getUsername());
+        user.setRealName(dto.getRealName());
         user.setPhone(dto.getPhone());
         user.setUserType(dto.getUserType());
         user.setPassword(dto.getPassword());
