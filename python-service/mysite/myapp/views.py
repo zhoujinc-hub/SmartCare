@@ -72,7 +72,6 @@ class StatisticsView(GenericViewSet, ListModelMixin):
     serializer_class = StatisticsListSerializer
 #人脸检测接口##
 from libs.baidu_ai import BaiDuFace
-from libs.baidu_ai import BaiDuFace
 from .serializers import CollectionSaveSerializer
 from rest_framework.exceptions import APIException
 
@@ -138,3 +137,101 @@ from .serializers import ActivitySerializer
 class ActivityView(GenericViewSet, ListModelMixin):
     queryset = Activity.objects.all().order_by('date')
     serializer_class = ActivitySerializer
+
+
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.db import IntegrityError
+import json
+from .models import User, Elder, Relation
+
+
+# 模拟登录接口（实际需加密密码，这里简化）
+@csrf_exempt  # 小程序POST请求需关闭CSRF
+def login(request):
+    if request.method != 'POST':
+        return JsonResponse({'code': -1, 'msg': '仅支持POST请求'})
+
+    data = json.loads(request.body)
+    username = data.get('username')
+    password = data.get('password')
+
+    try:
+        user = User.objects.get(username=username, password=password, status=1)
+        # 模拟生成token（实际用JWT/SESSION）
+        user_info = {
+            'user_id': user.user_id,
+            'username': user.username,
+            'real_name': user.real_name or username,
+            'phone': user.phone
+        }
+        return JsonResponse({
+            'code': 0,
+            'msg': '登录成功',
+            'data': user_info
+        })
+    except User.DoesNotExist:
+        return JsonResponse({'code': -1, 'msg': '用户名/密码错误'})
+
+
+# 获取当前用户信息（验证登录态）
+@csrf_exempt
+def get_user_info(request):
+    if request.method != 'POST':
+        return JsonResponse({'code': -1, 'msg': '仅支持POST请求'})
+
+    data = json.loads(request.body)
+    user_id = data.get('user_id')  # 小程序传递登录后的user_id
+
+    try:
+        user = User.objects.get(user_id=user_id, status=1)
+        return JsonResponse({
+            'code': 0,
+            'data': {
+                'real_name': user.real_name or user.username,
+                'user_id': user.user_id
+            }
+        })
+    except User.DoesNotExist:
+        return JsonResponse({'code': -1, 'msg': '未登录/用户不存在'})
+
+
+# 绑定老人信息接口
+@csrf_exempt
+def bind_elder(request):
+    if request.method != 'POST':
+        return JsonResponse({'code': -1, 'msg': '仅支持POST请求'})
+
+    data = json.loads(request.body)
+    # 必传参数
+    user_id = data.get('user_id')
+    elder_name = data.get('elder_name')
+    elder_age = data.get('elder_age')
+    elder_gender = data.get('elder_gender')
+    relationship = data.get('relationship')  # 与用户的关系
+
+    if not all([user_id, elder_name]):
+        return JsonResponse({'code': -1, 'msg': '老人姓名和用户ID不能为空'})
+
+    try:
+        # 1. 创建/查询老人信息
+        elder, created = Elder.objects.get_or_create(
+            name=elder_name,
+            defaults={
+                'age': elder_age,
+                'gender': elder_gender,
+                'address': data.get('address'),
+                'health_notes': data.get('health_notes')
+            }
+        )
+        # 2. 绑定用户-老人关系
+        Relation.objects.create(
+            user_id=user_id,
+            elder_id=elder.elder_id,
+            relationship=relationship
+        )
+        return JsonResponse({'code': 0, 'msg': '绑定老人信息成功'})
+    except IntegrityError:
+        return JsonResponse({'code': -1, 'msg': '已绑定该老人，请勿重复绑定'})
+    except Exception as e:
+        return JsonResponse({'code': -1, 'msg': f'绑定失败：{str(e)}'})
