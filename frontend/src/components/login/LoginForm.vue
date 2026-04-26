@@ -65,7 +65,7 @@
 import { ref, reactive } from 'vue'
 import { ElMessage, type FormInstance, type FormRules } from 'element-plus'
 import { Loading } from '@element-plus/icons-vue'
-import type { LoginForm } from '@/types/user'
+import type { LoginForm, LoginResponse } from '@/types/user'
 import { userLogin } from '@/api/user'
 import { setToken, setUserInfo, setRememberUser, clearRememberUser } from '@/utils/auth'
 
@@ -108,26 +108,28 @@ const onLogin = async () => {
     const { username, password, userType } = form
     const response = await userLogin({ username, password, userType })
 
-    if (!response.data) {
-      ElMessage.error('登录失败：服务器未返回有效数据')
+    console.log('登录接口返回（原始响应）：', response)
+
+    const resData = response.data as LoginResponse
+    console.log('登录接口返回（data部分）：', resData)
+
+    if (!resData?.token) {
+      ElMessage.error('登录失败：未返回token')
       return
     }
 
-    const userInfo = response.data as any
-    if (userInfo.token) {
-      setToken(userInfo.token)
-      setUserInfo(userInfo)
-      ElMessage.success('登录成功！')
-      emit('login-success', userType)
+    setToken(resData.token)
+    setUserInfo(resData)
+    ElMessage.success('登录成功！')
 
-      if (form.rememberMe) {
-        setRememberUser({ username, userType })
-      } else {
-        clearRememberUser()
-      }
+    if (form.rememberMe) {
+      setRememberUser({ username, userType })
     } else {
-      ElMessage.error('登录失败：未返回token')
+      clearRememberUser()
     }
+
+    emit('login-success', userType)
+
   } catch (err) {
     console.error(err)
     ElMessage.error('网络异常')

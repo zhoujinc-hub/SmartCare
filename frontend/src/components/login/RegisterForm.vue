@@ -11,6 +11,10 @@
         <el-input v-model="form.username" placeholder="请输入账号"></el-input>
       </el-form-item>
 
+      <el-form-item label="姓名" prop="realName">
+        <el-input v-model="form.realName" placeholder="请输入姓名"></el-input>
+      </el-form-item>
+
       <el-form-item label="手机号" prop="phone">
         <el-input v-model="form.phone" placeholder="请输入手机号"></el-input>
       </el-form-item>
@@ -72,18 +76,19 @@ const formRef = ref<FormInstance>()
 const loading = ref(false)
 const countdown = ref(0)
 
-// 用户类型固定为家属（2），前端不提供选择
 const form = reactive({
   username: '',
+  realName: '',
   phone: '',
   code: '',
   password: '',
   confirmPassword: '',
-  userType: 2 // 固定为家属，无法修改
+  userType: 2
 })
 
 const rules: FormRules = {
   username: [{ required: true, message: '请输入账号', trigger: 'blur' }],
+  realName: [{ required: true, message: '请输入姓名', trigger: 'blur' }],
   phone: [
     { required: true, message: '请输入手机号', trigger: 'blur' },
     { pattern: /^1[3-9]\d{9}$/, message: '手机号格式错误', trigger: 'blur' }
@@ -108,14 +113,26 @@ const rules: FormRules = {
   ]
 }
 
-// 发送验证码（复用忘记密码的接口）
 const sendCode = async () => {
+  console.log('====== 发送验证码开始 ======')
+  console.log('输入的手机号：', form.phone)
+
   if (!/^1[3-9]\d{9}$/.test(form.phone)) {
     ElMessage.warning('请输入正确的手机号')
     return
   }
+
   try {
-    const res = await sendVerifyCode(form.phone) as unknown as any
+    console.log('开始调用 sendVerifyCode 接口')
+    const res: any = await sendVerifyCode(form.phone)
+
+    console.log('sendVerifyCode 接口返回：', res)
+
+    if (!res) {
+      ElMessage.error('接口返回为空')
+      return
+    }
+
     if (res.code === 200) {
       ElMessage.success('验证码已发送')
       countdown.value = 60
@@ -124,26 +141,39 @@ const sendCode = async () => {
         if (countdown.value <= 0) clearInterval(timer)
       }, 1000)
     } else {
-      ElMessage.error(res.message || '发送失败')
+      ElMessage.error(`发送失败：${res.message || '未知错误'}`)
     }
   } catch (error) {
-    console.error(error)
-    ElMessage.error('网络异常')
+    console.error('sendVerifyCode 接口异常：', error)
+    ElMessage.error('网络异常，发送验证码失败')
   }
 }
 
 const onRegister = async () => {
+  console.log('====== 开始注册 ======')
+
   try {
     await formRef.value?.validate()
     loading.value = true
 
-    const res = await registerUser({
+    const params = {
       username: form.username,
+      realName: form.realName,
       phone: form.phone,
       code: form.code,
-      userType: form.userType, // 固定为家属
+      userType: form.userType,
       password: form.password
-    })
+    }
+
+    console.log('注册请求参数：', params)
+
+    const res: any = await registerUser(params)
+    console.log('注册接口返回：', res)
+
+    if (!res) {
+      ElMessage.error('注册接口返回为空')
+      return
+    }
 
     if (res.code === 200) {
       ElMessage.success('注册成功！')
@@ -151,11 +181,11 @@ const onRegister = async () => {
       emit('register-success')
       formRef.value?.resetFields()
     } else {
-      ElMessage.error(res.message || '注册失败')
+      ElMessage.error(`注册失败：${res.message || '未知原因'}`)
     }
   } catch (err) {
-    console.error(err)
-    ElMessage.error('网络异常')
+    console.error('注册异常：', err)
+    ElMessage.error('网络异常或服务端错误')
   } finally {
     loading.value = false
   }
@@ -166,7 +196,7 @@ const onRegister = async () => {
 .code-btn {
   width: 100%;
   color: #409eff;
-  border: 1px solid #e6f7ff;
+  border: 1px solid #e6e6e6;
   background-color: #f0f9ff;
 }
 </style>
