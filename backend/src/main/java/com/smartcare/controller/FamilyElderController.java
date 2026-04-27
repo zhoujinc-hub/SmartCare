@@ -17,7 +17,7 @@ import java.util.List;
  * 家属端老人管理接口
  */
 @RestController
-@RequestMapping("/family/elder")
+@RequestMapping("/api/family/elder")
 @RequiredArgsConstructor
 public class FamilyElderController {
 
