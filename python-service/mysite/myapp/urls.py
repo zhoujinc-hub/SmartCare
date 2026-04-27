@@ -26,8 +26,12 @@ router.register('face', FaceView, 'face')
 router.register('notice', NoticeView, 'notice')
 router.register('activity', ActivityView, 'activity')
 from .views import welcome
+from . import views
 urlpatterns = [
     # http://127.0.0.1:8000/smart/welcome/-->>就能获得图片数据
     path('welcome/', welcome),
+    path('api/login/', views.login),
+    path('api/get_user_info/', views.get_user_info),
+    path('api/bind_elder/', views.bind_elder), # 绑定老人信息
 ]
 urlpatterns += router.urls

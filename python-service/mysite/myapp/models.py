@@ -108,3 +108,44 @@ class JoinRecord(models.Model):
 
     class Meta:
         verbose_name_plural = '活动报名记录'
+
+class Elder(models.Model):
+    elder_id = models.BigAutoField(primary_key=True)
+    name = models.CharField(max_length=50)
+    age = models.IntegerField(null=True, blank=True)
+    gender = models.SmallIntegerField(null=True, blank=True, help_text="0:女 1:男")
+    address = models.CharField(max_length=255, null=True, blank=True)
+    health_notes = models.TextField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'elders'  # 关联MySQL的elders表
+        managed = False  # 不自动创建/修改表（已有MySQL表）
+
+# 对应 users 表
+class User(models.Model):
+    user_id = models.BigAutoField(primary_key=True)
+    username = models.CharField(max_length=50, unique=True)
+    password = models.CharField(max_length=255)
+    real_name = models.CharField(max_length=50, null=True, blank=True)
+    phone = models.CharField(max_length=20)
+    user_type = models.SmallIntegerField(help_text="1:管理员 2:家属")
+    status = models.SmallIntegerField(default=1, help_text="0:禁用 1:启用")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'users'
+        managed = False
+
+# 对应 relations 表（用户-老人绑定关系）
+class Relation(models.Model):
+    relation_id = models.BigAutoField(primary_key=True)
+    elder = models.ForeignKey(Elder, on_delete=models.CASCADE, db_column='elder_id')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, db_column='user_id')
+    relationship = models.CharField(max_length=20, null=True, blank=True, help_text="父子/母女等")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'relations'
+        managed = False
+        unique_together = ('elder', 'user')  # 唯一绑定关系
