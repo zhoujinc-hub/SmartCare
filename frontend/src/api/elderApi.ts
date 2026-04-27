@@ -1,7 +1,7 @@
 import request from '@/utils/request';
 import type { Elder, ElderFallEvent, PageQuery } from '@/types/elderType';
 
-// ============= 家属：我的老人 =============
+// 获取我的老人（根据当前登录用户ID关联 relations 表）
 export function getMyElderList() {
     return request({
         url: '/family/elder/list',
@@ -18,7 +18,7 @@ export function addElder(data: Elder) {
     });
 }
 
-// ============= 家属：老人摔倒事件 =============
+// 获取老人摔倒事件
 export function getElderFallEvents(elderId: number, params: PageQuery) {
     return request({
         url: `/family/elder/${elderId}/fallEvents`,

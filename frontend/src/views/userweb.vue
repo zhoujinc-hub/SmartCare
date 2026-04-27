@@ -5,7 +5,7 @@
       <p>管理老人信息 & 查看摔倒告警</p>
     </div>
 
-    <!-- 1. 添加老人 -->
+    <!-- 添加老人 -->
     <el-card class="card-box" shadow="hover">
       <div class="card-title">添加老人信息</div>
       <el-form
@@ -15,8 +15,8 @@
           label-width="80px"
           style="max-width: 600px"
       >
-        <el-form-item label="姓名" prop="realName">
-          <el-input v-model="elderForm.realName" placeholder="请输入老人姓名" style="width: 300px" />
+        <el-form-item label="姓名" prop="name">
+          <el-input v-model="elderForm.name" placeholder="请输入老人姓名" style="width: 300px" />
         </el-form-item>
 
         <el-form-item label="性别" prop="gender">
@@ -30,16 +30,12 @@
           <el-input-number v-model="elderForm.age" :min="50" :max="120" style="width: 300px" />
         </el-form-item>
 
-        <el-form-item label="联系电话" prop="phone">
-          <el-input v-model="elderForm.phone" placeholder="请输入电话" style="width: 300px" />
-        </el-form-item>
-
-        <el-form-item label="身份证" prop="idCard">
-          <el-input v-model="elderForm.idCard" placeholder="身份证号" style="width: 300px" />
-        </el-form-item>
-
         <el-form-item label="家庭住址">
           <el-input v-model="elderForm.address" type="textarea" rows="3" style="width: 300px" />
+        </el-form-item>
+
+        <el-form-item label="健康备注">
+          <el-input v-model="elderForm.healthNotes" type="textarea" rows="2" style="width: 300px" />
         </el-form-item>
 
         <el-form-item>
@@ -48,16 +44,16 @@
       </el-form>
     </el-card>
 
-    <!-- 2. 我的老人列表 -->
+    <!-- 我的老人列表 -->
     <el-card class="card-box" shadow="hover">
       <div class="card-title">我的老人</div>
       <el-table :data="elderList" border v-loading="loading">
-        <el-table-column label="姓名" prop="realName" />
+        <el-table-column label="姓名" prop="name" />
         <el-table-column label="性别">
           <template #default="scope">{{ scope.row.gender === 1 ? '男' : '女' }}</template>
         </el-table-column>
         <el-table-column label="年龄" prop="age" />
-        <el-table-column label="电话" prop="phone" />
+        <el-table-column label="住址" prop="address" />
         <el-table-column label="操作">
           <template #default="scope">
             <el-button type="primary" text @click="toQueryEvents(scope.row.elderId)">
@@ -68,12 +64,11 @@
       </el-table>
     </el-card>
 
-    <!-- 3. 摔倒事件弹窗 -->
+    <!-- 摔倒事件弹窗 -->
     <el-dialog v-model="eventVisible" title="老人摔倒事件记录" width="70%" append-to-body>
       <el-table :data="eventList" border v-loading="eventLoading">
         <el-table-column label="告警时间" prop="detectTime" width="200" />
         <el-table-column label="老人姓名" prop="elderName" />
-        <el-table-column label="位置" prop="locationDesc" />
         <el-table-column label="状态" width="120">
           <template #default="scope">
             <el-tag :type="scope.row.status === 1 ? 'warning' : scope.row.status === 2 ? 'success' : 'info'">
@@ -93,36 +88,24 @@ import type { FormInstance } from 'element-plus'
 import type { Elder } from '@/types/elderType'
 import { getMyElderList, addElder, getElderFallEvents } from '@/api/elderApi'
 
-// 加载
 const loading = ref(false)
 const eventLoading = ref(false)
-
-// 我的老人列表
 const elderList = ref<any[]>([])
+const eventVisible = ref(false)
+const eventList = ref<any[]>([])
 
-// 表单
 const formRef = ref<FormInstance>()
 const elderForm = reactive<Elder>({
-  realName: '',
+  name: '',
   gender: 1,
   age: 60,
-  phone: '',
-  idCard: '',
   address: '',
-  status: 1
+  healthNotes: ''
 })
 
 const elderRules = {
-  realName: [{ required: true, message: '请输入姓名', trigger: 'blur' }],
-  gender: [{ required: true, trigger: 'change' }],
-  age: [{ required: true, trigger: 'change' }],
-  phone: [{ required: true, message: '请输入电话', trigger: 'blur' }],
-  idCard: [{ required: true, message: '请输入身份证', trigger: 'blur' }]
+  name: [{ required: true, message: '请输入姓名', trigger: 'blur' }],
 }
-
-// 摔倒事件弹窗
-const eventVisible = ref(false)
-const eventList = ref<any[]>([])
 
 // 获取我的老人
 const loadMyElders = async () => {

@@ -1,36 +1,39 @@
 /**
- * 老人信息类型
+ * 老人信息（匹配 elders 表）
  */
 export interface Elder {
     elderId?: number;
-    userId?: number;        // 绑定的家属ID
-    realName: string;         // 老人姓名
-    gender: 0 | 1;            // 0女 1男
-    age: number;              // 年龄
-    phone: string;            // 联系电话
-    idCard: string;           // 身份证
-    address: string;          // 家庭住址
-    status: 0 | 1;            // 0禁用 1正常
+    name: string;         // 数据库：name
+    age?: number;
+    gender?: 0 | 1;       // 0女 1男
+    address?: string;
+    healthNotes?: string;
     createdAt?: string;
 }
 
 /**
- * 摔倒事件（家属可见）
+ * 摔倒事件（匹配 fall_events 表）
  */
 export interface ElderFallEvent {
+    eventId?: number;
+    cameraId?: number;
     elderId?: number;
-    userId?: number;
-    elderName: string;
+    elderName?: string;
+    isRegistered?: 0 | 1;
     fallTime: string;
     detectTime: string;
-    locationDesc?: string;
-    status: 1 | 2 | 3;        // 1待处理 2已处理 3误报
-    screenshotPath?: string;
     videoPath?: string;
+    screenshotPath?: string;
+    confidence?: number;
+    status: 1 | 2 | 3; // 1待处理 2已处理 3误报
+    processedBy?: number;
+    processedAt?: string;
+    processNotes?: string;
+    createdAt?: string;
 }
 
 /**
- * 分页查询参数
+ * 分页参数
  */
 export interface PageQuery {
     pageNum: number;
