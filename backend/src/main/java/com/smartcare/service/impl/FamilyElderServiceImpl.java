@@ -33,21 +33,26 @@ public class FamilyElderServiceImpl implements FamilyElderService {
     private final FallEventsMapper fallEventsMapper;
 
     /**
-     * 查询当前家属绑定的老人列表
+     * 查询指定家属绑定的老人列表
      */
     @Override
-    public List<ElderVO> listMyElders() {
-        Long userId = getCurrentUserId();
+    public List<ElderVO> listMyElders(Long userId) {
+        if (userId == null) {
+            throw new BusinessException(ResultCodeEnum.PARAM_ERROR, "用户ID不能为空");
+        }
+
         return eldersMapper.selectFamilyElderList(userId);
     }
 
     /**
-     * 添加老人信息，并绑定当前家属
+     * 添加老人信息，并绑定指定家属
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void addElder(ElderAddDTO dto) {
-        Long userId = getCurrentUserId();
+    public void addElder(Long userId, ElderAddDTO dto) {
+        if (userId == null) {
+            throw new BusinessException(ResultCodeEnum.PARAM_ERROR, "用户ID不能为空");
+        }
 
         Elders elder = new Elders();
         elder.setName(dto.getName());
@@ -60,10 +65,7 @@ public class FamilyElderServiceImpl implements FamilyElderService {
         elder.setAddress(dto.getAddress());
 
         /*
-         * 如果你的 Elders 实体和 elders 表里有 health_notes 字段，
-         * 就保留这一行。
-         *
-         * 如果实体没有 setHealthNotes 方法，删掉这一行。
+         * 如果 Elders 实体里没有 setHealthNotes 方法，就删掉这一行。
          */
         elder.setHealthNotes(dto.getHealthNotes());
 
@@ -87,8 +89,10 @@ public class FamilyElderServiceImpl implements FamilyElderService {
      * 查询某个老人的跌倒事件分页列表
      */
     @Override
-    public PageVo<ElderFallEventVO> listFallEvents(Long elderId, PageQueryDTO pageQuery) {
-        Long userId = getCurrentUserId();
+    public PageVo<ElderFallEventVO> listFallEvents(Long userId, Long elderId, PageQueryDTO pageQuery) {
+        if (userId == null) {
+            throw new BusinessException(ResultCodeEnum.PARAM_ERROR, "用户ID不能为空");
+        }
 
         if (elderId == null) {
             throw new BusinessException(ResultCodeEnum.PARAM_ERROR, "老人ID不能为空");
@@ -157,15 +161,5 @@ public class FamilyElderServiceImpl implements FamilyElderService {
             return 0L;
         }
         return (total + pageSize - 1) / pageSize;
-    }
-
-    /**
-     * 获取当前登录家属用户ID
-     *
-     * 当前先写死 1L 联调。
-     * 后续接登录认证后，替换为真实登录用户ID。
-     */
-    private Long getCurrentUserId() {
-        return 1L;
     }
 }

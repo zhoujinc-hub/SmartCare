@@ -24,37 +24,36 @@ public class FamilyElderController {
     private final FamilyElderService familyElderService;
 
     /**
-     * 查询当前家属绑定的老人列表
+     * 查询指定家属绑定的老人列表
      *
-     * 前端接口：
-     * GET /family/elder/list
+     * GET /api/family/elder/list/7
      */
-    @GetMapping("/list")
-    public Result<List<ElderVO>> listMyElders() {
-        return Result.ok(familyElderService.listMyElders());
+    @GetMapping("/list/{userId}")
+    public Result<List<ElderVO>> listMyElders(@PathVariable Long userId) {
+        return Result.ok(familyElderService.listMyElders(userId));
     }
 
     /**
-     * 添加老人信息，并绑定当前家属
+     * 添加老人信息，并绑定指定家属
      *
-     * 前端接口：
-     * POST /family/elder/add
+     * POST /api/family/elder/add/7
      */
-    @PostMapping("/add")
-    public Result<Void> addElder(@Valid @RequestBody ElderAddDTO dto) {
-        familyElderService.addElder(dto);
+    @PostMapping("/add/{userId}")
+    public Result<Void> addElder(@PathVariable Long userId,
+                                 @Valid @RequestBody ElderAddDTO dto) {
+        familyElderService.addElder(userId, dto);
         return Result.ok();
     }
 
     /**
      * 查询某个老人的跌倒事件记录
      *
-     * 前端接口：
-     * GET /family/elder/{elderId}/fallEvents?pageNum=1&pageSize=100
+     * GET /api/family/elder/7/{elderId}/fallEvents?pageNum=1&pageSize=100
      */
-    @GetMapping("/{elderId}/fallEvents")
-    public Result<PageVo<ElderFallEventVO>> listFallEvents(@PathVariable Long elderId,
+    @GetMapping("/{userId}/{elderId}/fallEvents")
+    public Result<PageVo<ElderFallEventVO>> listFallEvents(@PathVariable Long userId,
+                                                           @PathVariable Long elderId,
                                                            PageQueryDTO pageQuery) {
-        return Result.ok(familyElderService.listFallEvents(elderId, pageQuery));
+        return Result.ok(familyElderService.listFallEvents(userId, elderId, pageQuery));
     }
 }
