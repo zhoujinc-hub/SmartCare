@@ -5,6 +5,8 @@ from typing import Any, Dict, Optional
 import requests
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+from dotenv import load_dotenv
+load_dotenv()  # 自动读取 .env 文件
 
 # 创建 FastAPI 应用实例，配置应用标题
 app = FastAPI(title="SmartCare AI Minimal API")
@@ -13,6 +15,9 @@ app = FastAPI(title="SmartCare AI Minimal API")
 SPRING_BOOT_URL = os.getenv("SPRING_BOOT_URL", "http://localhost:8080/api/ai/ingest")
 # 从环境变量读取请求超时时间（秒），默认 5 秒
 SPRING_BOOT_TIMEOUT = float(os.getenv("SPRING_BOOT_TIMEOUT", "5"))
+
+print(f"[INFO] 转发目标: {SPRING_BOOT_URL}")
+print(f"[INFO] 超时设置: {SPRING_BOOT_TIMEOUT}秒")
 
 
 # 定义转发请求的数据模型
