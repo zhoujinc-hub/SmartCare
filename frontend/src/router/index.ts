@@ -7,13 +7,14 @@ import Cameras from "@/views/Cameras.vue";
 import Login from "@/views/login.vue";
 import FallEvent from "@/views/fallEvent.vue";
 
-// 先创建一个占位的家属页面（后续再开发）
+// ⭐ 正确路径（关键）
+import AlarmMap from "@/views/AlarmMap.vue";
+
 const UserWeb = () => import('@/views/userweb.vue')
 
 const router = createRouter({
     history: createWebHistory(),
     routes: [
-        // 登录页设为默认启动页
         {
             path: "/",
             redirect: "/login"
@@ -23,8 +24,6 @@ const router = createRouter({
             name: "Login",
             component: Login
         },
-
-        // 管理员布局（所有管理页面）
         {
             path: "/admin",
             component: MainLayout,
@@ -34,18 +33,17 @@ const router = createRouter({
                 { path: "alerts", component: Alerts },
                 { path: "elders", component: Elders },
                 { path: "cameras", component: Cameras },
-                { path: "fallEvent", component: FallEvent }
+                { path: "fallEvent", component: FallEvent },
+
+                // ⭐ 报警地图
+                { path: "alarm/map", component: AlarmMap }
             ]
         },
-
-        // 家属页面（占位，后续开发）
         {
             path: "/userweb",
             name: "UserWeb",
             component: UserWeb
         },
-
-        // 404兜底：所有未匹配的路径都跳转到登录页或404页面
         {
             path: "/:pathMatch(.*)*",
             redirect: "/login"
