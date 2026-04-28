@@ -50,49 +50,109 @@
 </script>
 
 <style scoped>
-/* 全局重置，避免默认边距 */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+/* ===== 全局 ===== */
+.el-container {
+  background:
+      radial-gradient(circle at 10% 10%, #ffffff 0%, transparent 30%),
+      radial-gradient(circle at 90% 0%, #eef4ff 0%, transparent 30%),
+      linear-gradient(135deg, #eef3f8 0%, #f8fbff 100%);
 }
 
-/* 菜单样式优化 - 白色主题 */
-:deep(.el-menu) {
-  --el-menu-hover-text-color: #409eff;
-  --el-menu-active-text-color: #409eff;
-  --el-menu-bg-color: #ffffff;
-  --el-menu-text-color: #333333;
-  --el-menu-border-color: #e6e6e6;
-}
-
-:deep(.el-menu-item) {
-  height: 60px;
-  line-height: 60px;
-  --el-menu-item-hover-bg-color: #f0f9ff;
-  --el-menu-item-active-bg-color: #e6f7ff;
-  border-radius: 0;
-}
-
-:deep(.el-menu-item:hover),
-:deep(.el-menu-item.is-active) {
-  background-color: #f0f9ff !important;
-  color: #409eff !important;
-}
-
-/* 子页面容器样式适配（白色主题） */
-:deep(.elders-container) {
-  background-color: #f9f9f9 !important;
-  color: #333333 !important;
-}
-
-/* Header样式 */
-.el-header {
-  border-bottom: 1px solid #e6e6e6;
-}
-
-/* Aside样式 */
+/* ===== 左侧导航（软浮雕面板）===== */
 .el-aside {
-  border-right: 1px solid #e6e6e6;
+  margin: 16px;
+  border-radius: 24px;
+  background: linear-gradient(145deg, #ffffff, #edf3f8);
+  box-shadow:
+      14px 14px 30px rgba(163, 177, 198, 0.28),
+      -14px -14px 30px rgba(255, 255, 255, 0.95);
+  border: none !important;
+}
+
+/* 菜单 */
+:deep(.el-menu) {
+  border: none !important;
+  background: transparent;
+}
+
+/* 菜单项 */
+:deep(.el-menu-item) {
+  height: 52px;
+  margin: 8px 12px;
+  border-radius: 14px;
+  font-weight: 500;
+  transition: all 0.18s ease;
+
+  background: transparent;
+}
+
+/* hover 浮起 */
+:deep(.el-menu-item:hover) {
+  transform: translateY(-2px);
+  background: #f3f7fb;
+  box-shadow:
+      4px 4px 10px rgba(163, 177, 198, 0.25),
+      -4px -4px 10px rgba(255, 255, 255, 0.9);
+}
+
+/* 激活态（Soft UI胶囊） */
+:deep(.el-menu-item.is-active) {
+  color: #fff !important;
+  background: linear-gradient(135deg, #7c8cff, #5b6ee1);
+  box-shadow:
+      6px 6px 14px rgba(163, 177, 198, 0.3),
+      -6px -6px 14px rgba(255, 255, 255, 0.9);
+}
+
+/* ===== Header（浮层）===== */
+.el-header {
+  margin: 16px 16px 0 0;
+  border-radius: 20px;
+  background: linear-gradient(145deg, #ffffff, #edf3f8);
+  box-shadow:
+      10px 10px 24px rgba(163, 177, 198, 0.25),
+      -10px -10px 24px rgba(255, 255, 255, 0.9);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* 标题 */
+.el-header span:first-child {
+  font-size: 20px;
+  font-weight: 700;
+  color: #344054;
+}
+
+/* 右侧副标题 */
+.el-header span:last-child {
+  font-size: 12px;
+  color: #98a2b3;
+}
+
+/* ===== 主内容区 ===== */
+.el-main {
+  margin: 16px;
+  border-radius: 24px;
+  padding: 20px;
+  background:
+      linear-gradient(145deg, #ffffff, #edf3f8);
+  box-shadow:
+      inset 6px 6px 14px rgba(163, 177, 198, 0.18),
+      inset -6px -6px 14px rgba(255, 255, 255, 0.9);
+}
+
+/* ===== 子页面适配（统一风格）===== */
+:deep(.elder-management-container),
+:deep(.cameras-container),
+:deep(.fall-event-page) {
+  background: transparent !important;
+  padding: 0 !important;
+}
+
+/* ===== 全局过渡 ===== */
+* {
+  transition: all 0.18s ease;
 }
 </style>
