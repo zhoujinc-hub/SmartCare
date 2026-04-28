@@ -66,3 +66,6 @@ ai-service
 │
 └── run.py                      # 启动脚本
 ```
+
+日常联调用 python run.py；本机看画面用 python 
+  src/main.py --model …

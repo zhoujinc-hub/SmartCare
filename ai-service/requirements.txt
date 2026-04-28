@@ -6,5 +6,6 @@ pyyaml
 fastapi
 uvicorn
 dotenv
+python-dotenv
 
 
