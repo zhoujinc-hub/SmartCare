@@ -4,6 +4,7 @@ import time
 import os
 import json
 from datetime import datetime
+from collections import deque
 
 from camera.camera import Camera
 from detection.model_manager import ModelManager
@@ -28,6 +29,26 @@ def run(model_name: str, source=0):
         cv2.imwrite(path, frame)
         return path
 
+    # ===== 视频缓冲区（存前5秒）=====
+    buffer_seconds = 5
+    fps = 20  # 估算摄像头帧率（可以调）
+    frame_buffer = deque(maxlen=buffer_seconds * fps)
+    
+    def save_video(frames, filename):
+        os.makedirs("data/videos", exist_ok=True)
+
+        h, w, _ = frames[0].shape
+        path = f"data/videos/{filename}.mp4"
+
+        fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+        out = cv2.VideoWriter(path, fourcc, fps, (w, h))
+
+        for f in frames:
+            out.write(f)
+
+        out.release()
+        return path
+
     camera = Camera(source=source)
     model_manager = ModelManager()
     detector = PersonDetector(model_manager, model_name)
@@ -36,6 +57,7 @@ def run(model_name: str, source=0):
     while True:
 
         ret, frame = camera.read()
+        frame_buffer.append(frame.copy())
         #检测是否获取到图片
         if not ret:
             break
@@ -51,25 +73,47 @@ def run(model_name: str, source=0):
             if fall_condition:
                 now = time.time()
 
-                # 10秒内只触发一次
                 if now - last_trigger_time > 10:
                     last_trigger_time = now
 
-                    print("⚠️ 检测到摔倒！")
+                    print("⚠️ 检测到摔倒！开始保存视频...")
 
-                    # 1️⃣ 保存截图
+                    # 1️⃣ 先拿“前5秒”
+                    pre_frames = list(frame_buffer)
+
+                    # 2️⃣ 再录“后5秒”
+                    post_frames = []
+                    start_time = time.time()
+
+                    while time.time() - start_time < 5:
+                        ret2, frame2 = camera.read()
+                        if not ret2:
+                            break
+                        post_frames.append(frame2)
+
+                    # 3️⃣ 合并
+                    all_frames = pre_frames + post_frames
+
+                    # 4️⃣ 保存视频
+                    filename = datetime.now().strftime("%Y%m%d_%H%M%S")
+                    video_path = save_video(all_frames, filename)
+
+                    # 5️⃣ 保存截图（可选）
                     screenshot_path = save_screenshot(frame)
 
-                    # 2️⃣ 构建事件
+                    # 6️⃣ 构建事件
                     event = {
                         "camera_id": 1,
                         "fall_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                         "confidence": 0.9,
+                        "video_path": video_path,
                         "screenshot_path": screenshot_path
                     }
 
-                    # 3️⃣ 保存事件
+                    # 7️⃣ 保存
                     save_event(event)
+
+                    print("✅ 视频已保存:", video_path)
 
         cv2.imshow("SmartCare AI", frame)
 
