@@ -32,4 +32,6 @@ public interface RelationsMapper extends BaseMapper<Relations> {
     """)
     int countFamilyElderRelation(@Param("userId") Long userId,
                                  @Param("elderId") Long elderId);
+    int deleteFamilyElderRelation(@Param("userId") Long userId,
+                                  @Param("elderId") Long elderId);
 }

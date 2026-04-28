@@ -42,4 +42,19 @@
         ORDER BY r.relation_id ASC
     </select>
 
+    <!-- 校验家属和老人是否存在绑定关系 -->
+    <select id="countFamilyElderRelation" resultType="int">
+        SELECT COUNT(1)
+        FROM relations
+        WHERE user_id = #{userId}
+        AND elder_id = #{elderId}
+    </select>
+
+    <!-- 删除家属与老人的绑定关系 -->
+    <delete id="deleteFamilyElderRelation">
+        DELETE FROM relations
+        WHERE user_id = #{userId}
+        AND elder_id = #{elderId}
+    </delete>
+
 </mapper>

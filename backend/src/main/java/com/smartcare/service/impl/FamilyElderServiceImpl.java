@@ -32,6 +32,28 @@ public class FamilyElderServiceImpl implements FamilyElderService {
 
     private final FallEventsMapper fallEventsMapper;
 
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteElder(Long userId, Long elderId) {
+        if (userId == null) {
+            throw new BusinessException(ResultCodeEnum.PARAM_ERROR, "用户ID不能为空");
+        }
+
+        if (elderId == null) {
+            throw new BusinessException(ResultCodeEnum.PARAM_ERROR, "老人ID不能为空");
+        }
+
+        int relationCount = relationsMapper.countFamilyElderRelation(userId, elderId);
+        if (relationCount <= 0) {
+            throw new BusinessException(ResultCodeEnum.RELATION_NOT_EXIST, "无权删除该老人信息");
+        }
+
+        int deleteCount = relationsMapper.deleteFamilyElderRelation(userId, elderId);
+        if (deleteCount <= 0) {
+            throw new BusinessException(ResultCodeEnum.RELATION_DELETE_ERROR);
+        }
+    }
+
     /**
      * 查询指定家属绑定的老人列表
      */
@@ -45,13 +67,17 @@ public class FamilyElderServiceImpl implements FamilyElderService {
     }
 
     /**
-     * 添加老人信息，并绑定指定家属
+     * 添加老人信息，并绑定当前家属
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void addElder(Long userId, ElderAddDTO dto) {
         if (userId == null) {
             throw new BusinessException(ResultCodeEnum.PARAM_ERROR, "用户ID不能为空");
+        }
+
+        if (dto == null) {
+            throw new BusinessException(ResultCodeEnum.PARAM_ERROR, "老人信息不能为空");
         }
 
         Elders elder = new Elders();
@@ -63,10 +89,6 @@ public class FamilyElderServiceImpl implements FamilyElderService {
         }
 
         elder.setAddress(dto.getAddress());
-
-        /*
-         * 如果 Elders 实体里没有 setHealthNotes 方法，就删掉这一行。
-         */
         elder.setHealthNotes(dto.getHealthNotes());
 
         int insertCount = eldersMapper.insert(elder);
@@ -84,6 +106,31 @@ public class FamilyElderServiceImpl implements FamilyElderService {
             throw new BusinessException(ResultCodeEnum.RELATION_SAVE_ERROR);
         }
     }
+
+    /**
+     * 删除老人绑定关系
+     *
+     * 注意：
+     * 这里优先删除 relations 关系，不直接删 elders 表。
+     * 因为一个老人理论上可能被多个家属绑定。
+     *
+     * 如果你的业务是“一删就彻底删除老人”，可以在删除关系后再判断是否还有其他关系，
+     * 没有的话再删 elders。
+     */
+
+
+        /*
+         * 如果你希望删除关系后，同时删除老人主表数据，可以打开下面逻辑。
+         *
+         * Long remainCount = relationsMapper.countByElderId(elderId);
+         * if (remainCount == null || remainCount <= 0) {
+         *     int elderDeleteCount = eldersMapper.deleteById(elderId);
+         *     if (elderDeleteCount <= 0) {
+         *         throw new BusinessException(ResultCodeEnum.ELDER_DELETE_ERROR);
+         *     }
+         * }
+         */
+
 
     /**
      * 查询某个老人的跌倒事件分页列表
