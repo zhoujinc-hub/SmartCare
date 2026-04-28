@@ -10,6 +10,7 @@
     "lint": "eslint ."
   },
   "dependencies": {
+    "@amap/amap-jsapi-loader": "^1.0.1",
     "axios": "^1.13.6",
     "echarts": "^6.0.0",
     "element-plus": "^2.13.5",
