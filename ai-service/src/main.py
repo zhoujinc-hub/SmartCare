@@ -6,6 +6,7 @@ import json
 from datetime import datetime
 from collections import deque
 import threading
+import requests
 
 from camera.camera import Camera
 from detection.model_manager import ModelManager
@@ -15,6 +16,23 @@ from utils.draw import draw_person
 
 
 def run(model_name: str, source=0):
+    def send_to_ai_gateway(event):
+        def task():
+            url = "http://127.0.0.1:8000/forward"
+
+            try:
+                resp = requests.post(
+                    url,
+                    json={"data": event},
+                    timeout=3
+                )
+                print("📡 AI Gateway成功:", resp.status_code)
+
+            except Exception as e:
+                print("❌ Gateway失败:", e)
+
+        threading.Thread(target=task).start()
+
     # ===== 新增：事件保存相关 =====
     last_trigger_time = 0  # 防重复触发
 
@@ -68,11 +86,11 @@ def run(model_name: str, source=0):
             break
         #返回人体框的x,y
         persons = detector.person_detect(frame)
-
         for p in persons:
-            fall_condition, ratio, fall_frame_count = fall_detector.fall_detect(p)
 
-            draw_person(frame, p, fall_condition, ratio, fall_frame_count)
+            fall_condition, ratio, count = fall_detector.fall_detect(p)
+
+            draw_person(frame, p, fall_condition, ratio, count)
 
             # ===== 新增：检测到摔倒后触发 =====
             if fall_condition:
@@ -113,14 +131,22 @@ def run(model_name: str, source=0):
                     # 6️⃣ 构建事件
                     event = {
                         "camera_id": 1,
+                        "elder_id": None,
+                        "elder_name": None,
+                        "is_registered": 0,
+
                         "fall_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                        "confidence": 0.9,
+                        "detect_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+
                         "video_path": video_path,
-                        "screenshot_path": screenshot_path
+                        "screenshot_path": screenshot_path,
+
+                        "confidence": max(0.5, min(1.0, 1 - abs(ratio - 1)))
                     }
 
                     # 7️⃣ 保存
                     save_event(event)
+                    send_to_ai_gateway(event)
 
                     print("✅ 视频已保存:", video_path)
 

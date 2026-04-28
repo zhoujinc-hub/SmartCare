@@ -1,29 +1,40 @@
-#业务逻辑：检测跌倒
-
 class FallDetector:
 
-    def __init__(self, ratio_threshold=1.2,fall_frame=20):
+    def __init__(self, ratio_threshold=1.2, fall_frame=15):
         self.ratio_threshold = ratio_threshold
         self.fall_frame = fall_frame
-        self.fall_frame_count = 0
+
+        # 👇 每个人单独计数
+        self.person_states = {}
 
     def fall_detect(self, person):
+
+        person_id = person["id"]
 
         w = person["w"]
         h = person["h"]
 
-        if w == 0:
-            return False
+        if w == 0 or h == 0:
+            return False, 0, 0
 
         ratio = h / w
 
+        # 初始化状态
+        if person_id not in self.person_states:
+            self.person_states[person_id] = 0
 
-        if ratio<self.ratio_threshold:
-            self.fall_frame_count += 1
-        else:#这里并未考虑干扰项，比如ratio受画面影响突然跳动到1.5，导致判断错误，count会瞬间清零
-            self.fall_frame_count = 0
-        # 跌倒判断
-        fall_condition = self.fall_frame_count >= self.fall_frame
+        # 🔥 连续帧判断
+        if ratio < self.ratio_threshold:
+            self.person_states[person_id] += 1
+        else:
+            # 🔥 加“缓冲机制”，避免抖动清零
+            self.person_states[person_id] = max(
+                0,
+                self.person_states[person_id] - 1
+            )
 
+        count = self.person_states[person_id]
 
-        return fall_condition, ratio,self.fall_frame_count
+        fall_condition = count >= self.fall_frame
+
+        return fall_condition, ratio, count

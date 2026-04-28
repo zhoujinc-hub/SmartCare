@@ -1,5 +1,7 @@
 # 导入必要的模块和依赖
+import json
 import os
+from datetime import datetime
 from typing import Any, Dict, Optional
 
 import requests
@@ -26,6 +28,20 @@ class ForwardRequest(BaseModel):
     headers: Optional[Dict[str, str]] = None  # 可选的 HTTP 请求头
 
 
+
+def normalize_event(data: dict):
+    return {
+        "source": "ai-camera",
+        "camera_id": data.get("camera_id"),
+        "event_type": "fall_detected",
+        "payload": data,
+        "timestamp": datetime.now().isoformat()
+    }
+def log_event(event):
+    os.makedirs("logs", exist_ok=True)
+
+    with open("logs/events.jsonl", "a", encoding="utf-8") as f:
+        f.write(json.dumps(event, ensure_ascii=False) + "\n")
 # 健康检查接口，用于服务状态监测
 @app.get("/health")
 def health() -> Dict[str, str]:
@@ -34,29 +50,24 @@ def health() -> Dict[str, str]:
 
 # 请求转发接口，将接收到的请求转发到 Spring Boot 后端
 @app.post("/forward")
-def forward(payload: ForwardRequest) -> Dict[str, Any]:
+def forward(payload: ForwardRequest):
+
+    event = normalize_event(payload.data)
+    log_event(event)
+
     try:
-        # 向 Spring Boot 发送 POST 请求
         resp = requests.post(
             SPRING_BOOT_URL,
-            json=payload.data,
-            headers=payload.headers,
+            json=event,
             timeout=SPRING_BOOT_TIMEOUT,
         )
+
     except requests.RequestException as exc:
-        # 捕获所有请求异常，抛出 502 错误
-        raise HTTPException(status_code=502, detail=f"Failed to reach Spring Boot: {exc}")
+        raise HTTPException(status_code=502, detail=str(exc))
 
-    # 根据响应头的 Content-Type 解析返回内容
-    content_type = resp.headers.get("content-type", "")
-    if "application/json" in content_type:
-        body: Any = resp.json()
-    else:
-        body = resp.text
-
-    # 返回包含状态和 Spring Boot 响应的结果
     return {
         "status": "ok",
-        "spring_status": resp.status_code,  # Spring Boot 返回的状态码
-        "spring_body": body,  # Spring Boot 返回的内容
+        "forwarded_event": event,
+        "spring_status": resp.status_code,
+        "spring_body": resp.text
     }
