@@ -23,6 +23,8 @@ public interface FamilyElderService {
      */
     void addElder(Long userId, ElderAddDTO dto);
 
+    void deleteElder(Long userId, Long elderId);
+
     /**
      * 查询某个老人的跌倒事件分页列表
      */

@@ -56,4 +56,11 @@ public class FamilyElderController {
                                                            PageQueryDTO pageQuery) {
         return Result.ok(familyElderService.listFallEvents(userId, elderId, pageQuery));
     }
+
+    @PostMapping("/{userId}/{elderId}/delete") // ✅ 加上 userId
+    public Result<Void> deleteElder(@PathVariable Long userId, // ✅ 加上 userId
+                                    @PathVariable Long elderId) {
+        familyElderService.deleteElder(userId, elderId); // ✅ 传两个参数
+        return Result.ok();
+    }
 }
