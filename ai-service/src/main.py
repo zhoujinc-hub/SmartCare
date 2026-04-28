@@ -5,6 +5,7 @@ import os
 import json
 from datetime import datetime
 from collections import deque
+import threading
 
 from camera.camera import Camera
 from detection.model_manager import ModelManager
@@ -33,21 +34,25 @@ def run(model_name: str, source=0):
     buffer_seconds = 5
     fps = 20  # 估算摄像头帧率（可以调）
     frame_buffer = deque(maxlen=buffer_seconds * fps)
-    
-    def save_video(frames, filename):
-        os.makedirs("data/videos", exist_ok=True)
 
-        h, w, _ = frames[0].shape
-        path = f"data/videos/{filename}.mp4"
+    def save_video_async(frames, filename, fps):
+        def task():
+            os.makedirs("data/videos", exist_ok=True)
 
-        fourcc = cv2.VideoWriter_fourcc(*"mp4v")
-        out = cv2.VideoWriter(path, fourcc, fps, (w, h))
+            h, w, _ = frames[0].shape
+            path = f"data/videos/{filename}.mp4"
 
-        for f in frames:
-            out.write(f)
+            fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+            out = cv2.VideoWriter(path, fourcc, fps, (w, h))
 
-        out.release()
-        return path
+            for f in frames:
+                out.write(f)
+
+            out.release()
+            print("✅ 视频保存完成:", path)
+
+        t = threading.Thread(target=task)
+        t.start()
 
     camera = Camera(source=source)
     model_manager = ModelManager()
@@ -96,7 +101,11 @@ def run(model_name: str, source=0):
 
                     # 4️⃣ 保存视频
                     filename = datetime.now().strftime("%Y%m%d_%H%M%S")
-                    video_path = save_video(all_frames, filename)
+
+                    # 🚀 多线程保存
+                    save_video_async(all_frames, filename, fps)
+
+                    video_path = f"data/videos/{filename}.mp4"
 
                     # 5️⃣ 保存截图（可选）
                     screenshot_path = save_screenshot(frame)
