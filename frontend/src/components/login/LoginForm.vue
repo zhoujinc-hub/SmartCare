@@ -69,6 +69,9 @@ import type { LoginForm, LoginResponse } from '@/types/user'
 import { userLogin } from '@/api/user'
 import { setToken, setUserInfo, setRememberUser, clearRememberUser } from '@/utils/auth'
 
+// 👇 关键：引入 Pinia 用户仓库
+import { useUserStore } from '@/stores/user'
+
 const props = defineProps({
   initForm: {
     type: Object as () => LoginForm,
@@ -91,6 +94,9 @@ const formRef = ref<FormInstance>()
 const loading = ref(false)
 const form = reactive<LoginForm>({ ...props.initForm })
 
+// 👇 关键：获取 Pinia store
+const userStore = useUserStore()
+
 const rules: FormRules = {
   username: [{ required: true, message: '请输入账号', trigger: 'blur' }],
   password: [
@@ -109,7 +115,6 @@ const onLogin = async () => {
     const response = await userLogin({ username, password, userType })
 
     console.log('登录接口返回（原始响应）：', response)
-
     const resData = response.data as LoginResponse
     console.log('登录接口返回（data部分）：', resData)
 
@@ -118,8 +123,23 @@ const onLogin = async () => {
       return
     }
 
+    // ==============================================
+    // 👇 👇 核心修复：把用户信息存入 Pinia（userId 就在这里）
+    // ==============================================
+    userStore.setUserInfo({
+      userId: resData.userId,       // 后端返回的 7
+      username: resData.username,
+      realName: resData.realName,
+      phone: resData.phone,
+      userType: resData.userType,
+      token: resData.token
+    })
+
+    console.log('✅ 登录成功，Pinia 已存入用户信息：', userStore.userInfo)
+
     setToken(resData.token)
     setUserInfo(resData)
+
     ElMessage.success('登录成功！')
 
     if (form.rememberMe) {
@@ -132,7 +152,7 @@ const onLogin = async () => {
 
   } catch (err) {
     console.error(err)
-    ElMessage.error('网络异常')
+    ElMessage.error('网络异常或登录失败')
   } finally {
     loading.value = false
   }

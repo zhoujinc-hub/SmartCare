@@ -40,11 +40,32 @@
         </el-tag>
       </template>
     </el-table-column>
-    <el-table-column label="操作" align="center" width="240" fixed="right">
+    <el-table-column label="操作" align="center" width="300" fixed="right">
       <template #default="{ row }">
-        <el-button size="small" type="primary" link @click="$emit('open-detail', row)">查看详情</el-button>
-        <el-button size="small" type="success" link @click="$emit('open-handle', row)">标记处理</el-button>
-        <el-button size="small" type="info" link @click="$emit('open-handle', row)">添加备注</el-button>
+        <div class="action-row">
+          <el-button
+              class="btn-main"
+              size="small"
+              @click="$emit('open-detail', row)"
+          >
+            查看详情
+          </el-button>
+
+          <el-button
+              class="btn-success"
+              size="small"
+              @click="$emit('open-handle', row)"
+          >
+            标注处理
+          </el-button>
+
+          <el-button
+              class="btn-note"
+              size="small"
+          >
+            添加备注
+          </el-button>
+        </div>
       </template>
     </el-table-column>
   </el-table>
