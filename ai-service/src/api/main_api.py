@@ -2,16 +2,45 @@
 import json
 import os
 from datetime import datetime
-from typing import Any, Dict, Optional
-
+from typing import Any, Dict, Optional,Set
+from fastapi import WebSocket,FastAPI, HTTPException, WebSocketDisconnect
 import requests
-from fastapi import FastAPI, HTTPException
+import asyncio
 from pydantic import BaseModel
 from dotenv import load_dotenv
 load_dotenv()  # 自动读取 .env 文件
 
 # 创建 FastAPI 应用实例，配置应用标题
 app = FastAPI(title="SmartCare AI Minimal API")
+
+connections: Set[WebSocket] = set()
+print("WS ROUTE LOADED")
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    await websocket.accept()
+    connections.add(websocket)
+
+    try:
+        while True:
+            # 👇 不阻塞 + 保活
+            await asyncio.sleep(60)
+
+    except WebSocketDisconnect:
+        connections.remove(websocket)
+
+
+
+async def broadcast(data: dict):
+    dead = set()
+
+    for conn in connections:
+        try:
+            await conn.send_json(data)
+        except:
+            dead.add(conn)
+
+    for d in dead:
+        connections.remove(d)
 
 # 从环境变量读取 Spring Boot 后端 URL，默认值为本地 8080 端口
 SPRING_BOOT_URL = os.getenv("SPRING_BOOT_URL", "http://localhost:8080/api/ai/ingest")
@@ -50,10 +79,11 @@ def health() -> Dict[str, str]:
 
 # 请求转发接口，将接收到的请求转发到 Spring Boot 后端
 @app.post("/forward")
-def forward(payload: ForwardRequest):
+async def forward(payload: ForwardRequest):
 
     event = normalize_event(payload.data)
     log_event(event)
+    asyncio.create_task(broadcast(event))
 
     try:
         resp = requests.post(

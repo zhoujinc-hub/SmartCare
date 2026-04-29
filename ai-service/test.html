@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>SmartCare 实时报警系统</title>
+
+    <style>
+        body {
+            font-family: Arial;
+            background: #0f172a;
+            color: white;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #38bdf8;
+        }
+
+        .alert {
+            background: #dc2626;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 10px;
+        }
+
+        .safe {
+            background: #16a34a;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 10px;
+        }
+
+        #log {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+<h1>🚨 SmartCare 实时跌倒监控</h1>
+
+<div id="status">连接中...</div>
+
+<div id="log"></div>
+
+<script>
+    const log = document.getElementById("log");
+    const status = document.getElementById("status");
+
+    const ws = new WebSocket("ws://127.0.0.1:8000/ws");
+
+ws.onopen = () => {
+    console.log("🟢 WebSocket已连接");
+};
+
+ws.onmessage = (event) => {
+    console.log("收到:", event.data);
+};
+
+ws.onerror = () => {
+    console.log("❌ 连接失败");
+};
+
+ws.onclose = () => {
+    console.log("🔴 连接关闭，3秒后重连");
+
+    setTimeout(() => {
+        location.reload();
+    }, 3000);
+};
+</script>
+
+</body>
+</html>

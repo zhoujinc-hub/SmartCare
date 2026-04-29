@@ -6,26 +6,39 @@ import json
 from datetime import datetime
 from collections import deque
 import threading
+
+import ratio
 import requests
+from sympy.printing.tree import print_node
 
 from camera.camera import Camera
 from detection.model_manager import ModelManager
 from detection.person_detector import PersonDetector
 from fall_detection.fall_detector import FallDetector
 from utils.draw import draw_person
+from detection.pose_detector import PoseDetector
+from fall_detection.medical_fall_engine import MedicalFallEngine
 
 
-def run(model_name: str, source=0):
+def run(source=0, camera_id=1):
+    last_positions = {}
+    still_threshold = 10  # 像素移动阈值
+    still_frames_required = 20  # ~1秒
+    still_counter = {}
+    triggered_persons = {}
+    cooldown = 10  # 秒
+
     def send_to_ai_gateway(event):
         def task():
-            url = "http://127.0.0.1:8000/forward"
+            url = "http://localhost:8080/api/ai/ingest"
 
             try:
                 resp = requests.post(
                     url,
-                    json={"data": event},
+                    json=event,
                     timeout=3
                 )
+
                 print("📡 AI Gateway成功:", resp.status_code)
 
             except Exception as e:
@@ -74,8 +87,8 @@ def run(model_name: str, source=0):
 
     camera = Camera(source=source)
     model_manager = ModelManager()
-    detector = PersonDetector(model_manager, model_name)
-    fall_detector = FallDetector()
+    detector = PoseDetector("yolov8n-pose.pt")
+    fall_engine = MedicalFallEngine()
     #检测是否正常工作
     while True:
 
@@ -85,26 +98,42 @@ def run(model_name: str, source=0):
         if not ret:
             break
         #返回人体框的x,y
-        persons = detector.person_detect(frame)
+        persons = detector.detect(frame)
+
         for p in persons:
 
-            fall_condition, ratio, count = fall_detector.fall_detect(p)
+            fall_condition, angle = fall_engine.process(p)
 
-            draw_person(frame, p, fall_condition, ratio, count)
+            # 🔥 可视化（建议加）
+            bbox = p.get("bbox", None)
+            if bbox is None:
+                continue
 
-            # ===== 新增：检测到摔倒后触发 =====
+            x1, y1, x2, y2 = map(int, bbox)
+            cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
+
+            cv2.putText(frame, f"angle:{angle:.1f}", (x1, y1 - 10),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 0), 2)
+
+
+
             if fall_condition:
+
                 now = time.time()
 
-                if now - last_trigger_time > 10:
+                if now - last_trigger_time > cooldown:
+
                     last_trigger_time = now
 
-                    print("⚠️ 检测到摔倒！开始保存视频...")
+                    print("🚨 医疗级跌倒检测！（全局触发）")
 
-                    # 1️⃣ 先拿“前5秒”
+                    # ===== 原来的逻辑 =====
+
+                    print("⚠️ 检测到摔跤！开始保存视频...")
+
                     pre_frames = list(frame_buffer)
 
-                    # 2️⃣ 再录“后5秒”
+
                     post_frames = []
                     start_time = time.time()
 
@@ -114,23 +143,20 @@ def run(model_name: str, source=0):
                             break
                         post_frames.append(frame2)
 
-                    # 3️⃣ 合并
                     all_frames = pre_frames + post_frames
 
-                    # 4️⃣ 保存视频
                     filename = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-                    # 🚀 多线程保存
                     save_video_async(all_frames, filename, fps)
 
                     video_path = f"data/videos/{filename}.mp4"
 
-                    # 5️⃣ 保存截图（可选）
                     screenshot_path = save_screenshot(frame)
 
-                    # 6️⃣ 构建事件
+                    confidence = float(max(0.5, min(1.0, 1 - float(angle) / 90)))
+
                     event = {
-                        "camera_id": 1,
+                        "camera_id": camera_id,
                         "elder_id": None,
                         "elder_name": None,
                         "is_registered": 0,
@@ -141,14 +167,14 @@ def run(model_name: str, source=0):
                         "video_path": video_path,
                         "screenshot_path": screenshot_path,
 
-                        "confidence": max(0.5, min(1.0, 1 - abs(ratio - 1)))
+                        "confidence": confidence,
+                        "angle": float(angle)
                     }
 
-                    # 7️⃣ 保存
                     save_event(event)
                     send_to_ai_gateway(event)
 
-                    print("✅ 视频已保存:", video_path)
+                    print("✅ 已上报一次:", video_path)
 
         cv2.imshow("SmartCare AI", frame)
 
@@ -161,8 +187,8 @@ def run(model_name: str, source=0):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model", required=True, help="Model file name under ./models")
     parser.add_argument("--source", default="0", help="Camera source index or video path")
+    parser.add_argument("--camera_id", default=1, type=int)
     args = parser.parse_args()
     source = int(args.source) if str(args.source).isdigit() else args.source
-    run(args.model, source)
+    run( source, args.camera_id)
