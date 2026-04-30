@@ -46,7 +46,7 @@
       <!-- 右侧告警表 + 饼图 -->
       <div class="right-content">
         <el-card class="list-card">
-          <div class="list-header">最新告警记录（前5条）</div>
+          <div class="list-header">最新告警记录</div>
           <el-table :data="alertList" border class="full-table" v-loading="loading">
             <el-table-column label="告警时间" width="160">
               <template #default="scope">{{ scope.row.detectTime || scope.row.fallTime || '-' }}</template>
@@ -257,24 +257,200 @@ onUnmounted(()=>{
 </script>
 
 <style scoped>
+/* ===== 页面背景（统一风格） ===== */
 .dashboard-container {
-  padding:24px;
-  background: radial-gradient(circle at 10% 10%,#fff,transparent 30%), linear-gradient(135deg,#eef3f8,#f8fbff);
+  position: relative;
+  min-height: 100vh;
+  padding: 24px;
+  box-sizing: border-box;
+  overflow: hidden;
+  background:
+      radial-gradient(circle at 12% 10%, rgba(255, 255, 255, 0.95), transparent 26%),
+      radial-gradient(circle at 88% 18%, rgba(191, 219, 254, 0.5), transparent 30%),
+      radial-gradient(circle at 48% 92%, rgba(204, 251, 241, 0.42), transparent 34%),
+      linear-gradient(135deg, #eef4fb 0%, #e7edf6 48%, #f7f9fd 100%);
+  color: #2f3b52;
 }
-.card-group{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-bottom:20px}
-.stat-card{border-radius:20px;background:linear-gradient(145deg,#f8fbff,#e7edf6);box-shadow:10px 10px 24px #cfd8e3,-10px -10px 24px #fff}
-.stat-item{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;gap:8px}
-.stat-label{font-size:13px;color:#7b8798;letter-spacing:0.05em}
-.stat-value{font-size:32px;font-weight:800;color:#2f3b52;line-height:1}
-.content-row{display:grid;grid-template-columns:2fr 1fr;grid-template-rows:1fr;gap:20px;margin-bottom:20px}
-.left-content{display:flex;flex-direction:column;gap:20px}
-.right-content{display:flex;flex-direction:column;gap:20px}
-.chart-card,.list-card{border-radius:24px;background:linear-gradient(145deg,#f8fbff,#e7edf6);box-shadow:10px 10px 24px #cfd8e3,-10px -10px 24px #fff;display:flex;flex-direction:column}
-.map-card{height:100%;overflow:hidden}
-.map-header,.list-header,.chart-header{font-size:16px;padding:10px 20px;border-bottom:1px solid #e6e6e6;font-weight:600;display:flex;justify-content:space-between;align-items:center}
-.real-map{flex:1;width:100%;height:100%}
-.chart-container{flex:1;width:100%;height:300px}
-.full-table{flex:1;width:100%}
+.dashboard-container,
+.content-row,
+.left-content,
+.right-content {
+  overflow: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.dashboard-container::-webkit-scrollbar,
+.content-row::-webkit-scrollbar,
+.left-content::-webkit-scrollbar,
+.right-content::-webkit-scrollbar {
+  display: none;
+}
+/* 背景装饰圆 */
+.dashboard-container::before,
+.dashboard-container::after {
+  content: "";
+  position: absolute;
+  border-radius: 999px;
+  background: #edf3fa;
+  box-shadow:
+      18px 18px 40px rgba(163, 177, 198, 0.28),
+      -18px -18px 40px rgba(255, 255, 255, 0.86);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.dashboard-container::before {
+  width: 260px;
+  height: 260px;
+  top: 8%;
+  left: 5%;
+}
+
+.dashboard-container::after {
+  width: 340px;
+  height: 340px;
+  right: 6%;
+  bottom: 8%;
+}
+
+/* 内容浮在背景之上 */
+.dashboard-container > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* ===== KPI 卡片 ===== */
+.card-group {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.stat-card {
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.6);
+  box-shadow:
+      16px 16px 36px rgba(163, 177, 198, 0.34),
+      -16px -16px 36px rgba(255, 255, 255, 0.92);
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  gap: 8px;
+}
+
+.stat-label {
+  font-size: 13px;
+  color: #7b8798;
+  letter-spacing: 0.05em;
+}
+
+.stat-value {
+  font-size: 32px;
+  font-weight: 800;
+  color: #2f3b52;
+}
+
+/* ===== 布局 ===== */
+.content-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 20px;
+}
+
+.left-content,
+.right-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ===== 通用卡片（统一风格） ===== */
+.map-card {
+  height: 752px;
+  display: flex;
+  flex-direction: column;
+}
+
+.real-map {
+  flex: 1;
+  width: 100%;
+  min-height: 400px;
+  border-radius: 16px;
+}
+.map-card,
+.list-card,
+.chart-card {
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.6);
+  box-shadow:
+      16px 16px 36px rgba(163, 177, 198, 0.34),
+      -16px -16px 36px rgba(255, 255, 255, 0.92);
+  display: flex;
+  flex-direction: column;
+}
+
+/* ===== 头部 ===== */
+.map-header,
+.list-header,
+.chart-header {
+  font-size: 16px;
+  padding: 12px 20px;
+  border-bottom: 1px solid rgba(203,213,225,0.5);
+  font-weight: 600;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* ===== 地图（关键优化） ===== */
+.real-map {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+/* ===== 表格 ===== */
+.full-table {
+  flex: 1;
+  width: 100%;
+}
+
+/* ===== 图表 ===== */
+.chart-container {
+  flex: 1;
+  width: 100%;
+  height: 300px;
+}
+
+/* ===== WS 状态 ===== */
+.ws-status {
+  font-size: 12px;
+  padding: 2px 10px;
+  border-radius: 999px;
+}
+
+.ws-status.online {
+  color: #22c55e;
+  background: rgba(34,197,94,0.12);
+}
+
+.ws-status.offline {
+  color: #f59e0b;
+  background: rgba(245,158,11,0.12);
+}
 </style>
 
 <style>

@@ -32,8 +32,8 @@
     <el-container>
       <!-- 顶部标题栏（白色主题） -->
       <el-header style="background: #ffffff; color: #333333; line-height: 60px; padding: 0 20px; border-bottom: 1px solid #e6e6e6;">
-        <span style="font-size: 20px; font-weight: bold; color: #1f2937;">智慧养老平台</span>
-        <span style="float: right; font-size: 12px; color: #666666;">SmartCare 智慧养老监护系统</span>
+        <span style="font-size: 20px; font-weight: bold; color: #1f2937;">智护安行</span>
+        <span style="float: right; font-size: 12px; color: #666666;">SmartCare 智护安行</span>
       </el-header>
 
       <!-- 主内容区域（浅灰背景，提升层次感） -->

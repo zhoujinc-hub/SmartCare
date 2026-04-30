@@ -6,7 +6,7 @@
         <div class="logo">
           <el-icon class="logo-icon"><House /></el-icon>
         </div>
-        <h2>智慧社区养老监护系统</h2>
+        <h2>智护安行</h2>
         <p class="login-desc">老人摔倒监测·智能报警·实时守护</p>
       </div>
 
@@ -19,7 +19,7 @@
       />
 
       <div class="login-footer">
-        <p>© 2026 智慧社区养老监护系统 版权所有</p>
+        <p>© 2026 智护安行 版权所有</p>
       </div>
     </el-card>
 

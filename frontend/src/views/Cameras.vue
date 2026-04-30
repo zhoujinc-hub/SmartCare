@@ -249,16 +249,59 @@ const handleRefreshStatus = async () => {
 </script>
 
 <style scoped>
-.cameras-container {
-  width: 100%;
+.cameras-container,
+.fall-event-page {
+  position: relative;
   min-height: 100vh;
   padding: 24px;
-  border-radius: 28px;
+  box-sizing: border-box;
+  overflow: hidden;
+  border-radius: 0;
   background:
-      radial-gradient(circle at 8% 6%, #ffffff 0%, transparent 28%),
-      radial-gradient(circle at 92% 10%, #eaf2ff 0%, transparent 30%),
-      linear-gradient(135deg, #eef3f8 0%, #f8fbff 100%);
+      radial-gradient(circle at 12% 10%, rgba(255, 255, 255, 0.95), transparent 26%),
+      radial-gradient(circle at 88% 18%, rgba(191, 219, 254, 0.5), transparent 30%),
+      radial-gradient(circle at 48% 92%, rgba(204, 251, 241, 0.42), transparent 34%),
+      linear-gradient(135deg, #eef4fb 0%, #e7edf6 48%, #f7f9fd 100%);
+  color: #2f3b52;
 }
+
+.cameras-container::before,
+.cameras-container::after{
+  content: "";
+  position: absolute;
+  border-radius: 999px;
+  background: #edf3fa;
+  box-shadow:
+      18px 18px 40px rgba(163, 177, 198, 0.28),
+      -18px -18px 40px rgba(255, 255, 255, 0.86);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.cameras-container::before{
+  width: 260px;
+  height: 260px;
+  top: 8%;
+  left: 5%;
+}
+
+.cameras-container::after{
+  width: 340px;
+  height: 340px;
+  right: 6%;
+  bottom: 8%;
+}
+.search-bar,
+.table-card,
+.camera-grid,
+.fall-event-card,
+:deep(.el-card),
+:deep(.el-table),
+:deep(.el-pagination) {
+  position: relative;
+  z-index: 1;
+}
+
 
 .page-header {
   margin-bottom: 20px;
@@ -284,24 +327,29 @@ const handleRefreshStatus = async () => {
 }
 
 /* 输入框 / 下拉框软内凹 */
-:deep(.el-input__wrapper),
 :deep(.el-select__wrapper) {
-  min-height: 42px;
-  border-radius: 999px;
-  background: #f3f7fb;
-  border: 1px solid rgba(255, 255, 255, 0.72);
+  height: 36px;
+  border-radius: 16px;
+  background: #eef3fa;
   box-shadow:
-      inset 5px 5px 10px rgba(163, 177, 198, 0.22),
-      inset -5px -5px 10px rgba(255, 255, 255, 0.95);
+      inset 6px 6px 12px rgba(163, 177, 198, 0.26),
+      inset -6px -6px 12px rgba(255, 255, 255, 0.86);
+  border: none;
   transition: all 0.18s ease;
 }
 
-:deep(.el-input__wrapper.is-focus),
+:deep(.el-select__wrapper:hover) {
+  box-shadow:
+      inset 5px 5px 10px rgba(163, 177, 198, 0.23),
+      inset -5px -5px 10px rgba(255, 255, 255, 0.9),
+      0 6px 14px rgba(163, 177, 198, 0.16);
+}
+
 :deep(.el-select__wrapper.is-focused) {
   box-shadow:
-      inset 3px 3px 7px rgba(163, 177, 198, 0.25),
-      inset -3px -3px 7px rgba(255, 255, 255, 0.95),
-      0 0 0 3px rgba(99, 102, 241, 0.08);
+      inset 4px 4px 8px rgba(163, 177, 198, 0.22),
+      inset -4px -4px 8px rgba(255, 255, 255, 0.92),
+      0 0 0 2px rgba(124, 140, 255, 0.2);
 }
 
 /* 胶囊按钮 */
@@ -420,21 +468,18 @@ const handleRefreshStatus = async () => {
 }
 
 /* 分页软面板 */
-.mt-4 {
-  margin-top: 20px;
-  text-align: right;
-}
-
+/* ===== 分页软浮雕 ===== */
 :deep(.el-pagination) {
-  display: inline-flex;
+  margin-top: 20px;
   padding: 14px 18px;
-  border-radius: 22px;
-  background: linear-gradient(145deg, #ffffff, #edf3f8);
+  border-radius: 20px;
+  background: linear-gradient(145deg, #ffffff, #eef3f8);
   box-shadow:
       8px 8px 18px rgba(163, 177, 198, 0.24),
-      -8px -8px 18px rgba(255, 255, 255, 0.92);
+      -8px -8px 18px rgba(255, 255, 255, 0.9);
 }
 
+/* 页码按钮 */
 :deep(.el-pager li),
 :deep(.el-pagination button) {
   border-radius: 12px;
@@ -444,9 +489,47 @@ const handleRefreshStatus = async () => {
       -4px -4px 9px rgba(255, 255, 255, 0.9);
 }
 
+/* 当前页 */
 :deep(.el-pager li.is-active) {
   color: #fff;
   background: linear-gradient(135deg, #7c8cff, #5b6ee1);
+}
+
+/* ===== ⭐关键：分页 sizes 下拉框 ===== */
+:deep(.el-pagination .el-select__wrapper) {
+  height: 32px;
+  border-radius: 14px;
+  background: #f3f7fb;
+  border: none;
+  box-shadow:
+      inset 4px 4px 8px rgba(163, 177, 198, 0.22),
+      inset -4px -4px 8px rgba(255, 255, 255, 0.9);
+}
+
+/* hover */
+:deep(.el-pagination .el-select__wrapper:hover) {
+  box-shadow:
+      inset 3px 3px 6px rgba(163, 177, 198, 0.22),
+      inset -3px -3px 6px rgba(255, 255, 255, 0.95),
+      0 6px 12px rgba(163, 177, 198, 0.15);
+}
+
+/* focus */
+:deep(.el-pagination .el-select__wrapper.is-focused) {
+  box-shadow:
+      inset 3px 3px 6px rgba(163, 177, 198, 0.25),
+      inset -3px -3px 6px rgba(255, 255, 255, 0.95),
+      0 0 0 2px rgba(124, 140, 255, 0.18);
+}
+
+/* Go to 输入框 */
+:deep(.el-pagination .el-input__wrapper) {
+  height: 32px;
+  border-radius: 14px;
+  background: #f3f7fb;
+  box-shadow:
+      inset 4px 4px 8px rgba(163, 177, 198, 0.22),
+      inset -4px -4px 8px rgba(255, 255, 255, 0.9);
 }
 
 @media (max-width: 992px) {
@@ -459,4 +542,5 @@ const handleRefreshStatus = async () => {
     justify-content: flex-start;
   }
 }
+
 </style>

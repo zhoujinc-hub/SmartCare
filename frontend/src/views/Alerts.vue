@@ -62,6 +62,7 @@ const handleDetail = (alert: AlertLog) => {
   padding: 24px;
   box-sizing: border-box;
   overflow: hidden;
+  border-radius: 0;
   background:
       radial-gradient(circle at 12% 10%, rgba(255, 255, 255, 0.95), transparent 26%),
       radial-gradient(circle at 88% 18%, rgba(191, 219, 254, 0.5), transparent 30%),
@@ -248,20 +249,28 @@ const handleDetail = (alert: AlertLog) => {
       -3px -3px 8px rgba(255, 255, 255, 0.86);
 }
 
-:deep(.el-pagination button),
-:deep(.el-pager li) {
-  border-radius: 12px;
-  background: #eef3fa;
+:deep(.el-pagination) {
+  margin-top: 20px;
+  padding: 14px 18px;
+  border-radius: 20px;
+  background: linear-gradient(145deg, #ffffff, #eef3f8);
   box-shadow:
-      4px 4px 10px rgba(163, 177, 198, 0.22),
-      -4px -4px 10px rgba(255, 255, 255, 0.86);
+      8px 8px 18px rgba(163, 177, 198, 0.24),
+      -8px -8px 18px rgba(255, 255, 255, 0.9);
+}
+
+:deep(.el-pager li),
+:deep(.el-pagination button) {
+  border-radius: 12px;
+  background: #f3f7fb;
+  box-shadow:
+      4px 4px 9px rgba(163, 177, 198, 0.2),
+      -4px -4px 9px rgba(255, 255, 255, 0.9);
 }
 
 :deep(.el-pager li.is-active) {
-  color: #409eff;
-  box-shadow:
-      inset 4px 4px 8px rgba(163, 177, 198, 0.24),
-      inset -4px -4px 8px rgba(255, 255, 255, 0.88);
+  color: #fff;
+  background: linear-gradient(135deg, #7c8cff, #5b6ee1);
 }
 
 /* 弹窗详情 */
