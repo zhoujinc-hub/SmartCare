@@ -93,6 +93,67 @@
               <el-button type="danger" @click="handleDelete(scope.row.elderId)">
                 删除
               </el-button>
+              <!-- 摔倒事件弹窗（含截图和视频查看） -->
+              <el-dialog v-model="eventVisible" title="老人摔倒事件记录" width="80%" append-to-body>
+                <el-table :data="eventList" border v-loading="eventLoading">
+                  <el-table-column label="告警时间" prop="detectTime" width="200" />
+                  <el-table-column label="老人姓名">
+                    <template #default="scope">
+                      {{ currentElder?.name || '-' }}
+                    </template>
+                  </el-table-column>
+                  <el-table-column label="位置">
+                    <template #default="scope">
+                      {{ scope.row.locationDesc || '无数据' }}
+                    </template>
+                  </el-table-column>
+                  <el-table-column label="状态" width="120">
+                    <template #default="scope">
+                      <el-tag :type="scope.row.status === 1 ? 'warning' : scope.row.status === 2 ? 'success' : 'info'">
+                        {{ scope.row.status === 1 ? '待处理' : scope.row.status === 2 ? '已处理' : '误报' }}
+                      </el-tag>
+                    </template>
+                  </el-table-column>
+                  <el-table-column label="截图" width="100">
+                    <template #default="scope">
+                      <el-button
+                          v-if="scope.row.screenshotPath"
+                          type="primary"
+                          size="small"
+                          link
+                          @click="viewScreenshot(scope.row.screenshotPath)"
+                      >
+                        查看截图
+                      </el-button>
+                      <span v-else style="color: #999">无截图</span>
+                    </template>
+                  </el-table-column>
+                  <el-table-column label="视频" width="100">
+                    <template #default="scope">
+                      <el-button
+                          v-if="scope.row.videoPath"
+                          type="primary"
+                          size="small"
+                          link
+                          @click="playVideo(scope.row.videoPath)"
+                      >
+                        查看视频
+                      </el-button>
+                      <span v-else style="color: #999">无视频</span>
+                    </template>
+                  </el-table-column>
+                </el-table>
+              </el-dialog>
+
+              <!-- 视频播放弹窗 -->
+              <el-dialog v-model="videoVisible" title="摔倒事件视频" width="60%" append-to-body>
+                <video controls :src="currentVideoUrl" style="width: 100%" />
+              </el-dialog>
+
+              <!-- 图片预览弹窗 -->
+              <el-dialog v-model="imageVisible" title="摔倒事件截图" width="50%" append-to-body>
+                <img :src="currentImageUrl" style="width: 100%; border-radius: 4px" />
+              </el-dialog>
             </div>
           </template>
         </el-table-column>
@@ -358,24 +419,41 @@ onMounted(() => {
 }
 
 /* ===== 表格 ===== */
+/* ===== 表格整体透明 ===== */
 :deep(.el-table) {
   border-radius: 18px;
   overflow: hidden;
-  background: transparent;
+
+  background: transparent !important;
+  --el-table-bg-color: transparent;
+  --el-table-tr-bg-color: transparent;
 }
 
+/* 表头 */
 :deep(.el-table th.el-table__cell) {
-  background: #edf3fa;
+  background: rgba(237, 243, 250, 0.8) !important;
   color: #64748b;
   font-weight: 700;
 }
 
+/* 表体单元格 */
 :deep(.el-table td.el-table__cell) {
-  background: rgba(255,255,255,0.4);
+  background: transparent !important;
 }
 
+/* 行背景（关键） */
+:deep(.el-table__body tr) {
+  background: transparent !important;
+}
+
+/* hover 效果（柔和一点，不要纯白） */
 :deep(.el-table__body tr:hover > td) {
-  background: rgba(255,255,255,0.7);
+  background: rgba(255,255,255,0.25) !important;
+}
+
+/* 去掉 stripe 斑马纹 */
+:deep(.el-table--striped .el-table__body tr.el-table__row--striped > td) {
+  background: transparent !important;
 }
 
 /* ===== Tag ===== */
