@@ -21,11 +21,10 @@ from fall_detection.medical_fall_engine import MedicalFallEngine
 
 
 def run(source=0, camera_id=1):
-    last_positions = {}
-    still_threshold = 10  # 像素移动阈值
-    still_frames_required = 20  # ~1秒
-    still_counter = {}
-    triggered_persons = {}
+    # ===== 输出检测视频 =====
+    output_path = "data/output_detected.mp4"
+    fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+    out = None
     cooldown = 10  # 秒
 
     def send_to_ai_gateway(event):
@@ -86,7 +85,6 @@ def run(source=0, camera_id=1):
         t.start()
 
     camera = Camera(source=source)
-    model_manager = ModelManager()
     detector = PoseDetector("yolov8n-pose.pt")
     fall_engine = MedicalFallEngine()
     #检测是否正常工作
@@ -94,94 +92,58 @@ def run(source=0, camera_id=1):
 
         ret, frame = camera.read()
         frame_buffer.append(frame.copy())
+
+        # 初始化视频写入器（只执行一次）
+        if out is None:
+            h, w, _ = frame.shape
+            out = cv2.VideoWriter(output_path, fourcc, fps, (w, h))
+
         #检测是否获取到图片
         if not ret:
             break
         #返回人体框的x,y
+        # ===== 检测 =====
         persons = detector.detect(frame)
 
         for p in persons:
 
             fall_condition, angle = fall_engine.process(p)
 
-            # 🔥 可视化（建议加）
-            bbox = p.get("bbox", None)
-            if bbox is None:
-                continue
+            x1, y1, x2, y2 = map(int, p["bbox"])
 
-            x1, y1, x2, y2 = map(int, bbox)
+            # ✅ 画框
             cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
 
+            # ✅ 角度
             cv2.putText(frame, f"angle:{angle:.1f}", (x1, y1 - 10),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 0), 2)
+            status = "FALL" if fall_condition else "NORMAL"
 
 
 
+            # ✅ 跌倒提示（重点）
             if fall_condition:
+                color = (0, 0, 255)  # 红色
+            else:
+                color = (0, 255, 0)  # 绿色
 
-                now = time.time()
+            cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
+            cv2.putText(frame, status, (x1, y2 + 20),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, color, 2)
 
-                if now - last_trigger_time > cooldown:
-
-                    last_trigger_time = now
-
-                    print("🚨 医疗级跌倒检测！（全局触发）")
-
-                    # ===== 原来的逻辑 =====
-
-                    print("⚠️ 检测到摔跤！开始保存视频...")
-
-                    pre_frames = list(frame_buffer)
-
-
-                    post_frames = []
-                    start_time = time.time()
-
-                    while time.time() - start_time < 5:
-                        ret2, frame2 = camera.read()
-                        if not ret2:
-                            break
-                        post_frames.append(frame2)
-
-                    all_frames = pre_frames + post_frames
-
-                    filename = datetime.now().strftime("%Y%m%d_%H%M%S")
-
-                    save_video_async(all_frames, filename, fps)
-
-                    video_path = f"data/videos/{filename}.mp4"
-
-                    screenshot_path = save_screenshot(frame)
-
-                    confidence = float(max(0.5, min(1.0, 1 - float(angle) / 90)))
-
-                    event = {
-                        "camera_id": camera_id,
-                        "elder_id": None,
-                        "elder_name": None,
-                        "is_registered": 0,
-
-                        "fall_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                        "detect_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-
-                        "video_path": video_path,
-                        "screenshot_path": screenshot_path,
-
-                        "confidence": confidence,
-                        "angle": float(angle)
-                    }
-
-                    save_event(event)
-                    send_to_ai_gateway(event)
-
-                    print("✅ 已上报一次:", video_path)
-
+        # ✅ 最后写入（必须在所有绘制之后）
+        if out:
+            out.write(frame)
         cv2.imshow("SmartCare AI", frame)
 
         if cv2.waitKey(1) == 27:
             break
 
     camera.release()
+
+    if out:
+        out.release()
+
     cv2.destroyAllWindows()
 
 

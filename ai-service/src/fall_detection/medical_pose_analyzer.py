@@ -38,7 +38,7 @@ class MedicalPoseAnalyzer:
             angle = self.compute_angle(shoulder, hip, ankle)
 
             # 医疗级阈值
-            is_fall = angle < 45  # 越小越躺
+            is_fall = angle < 110  # 越小越躺
 
             return is_fall, angle
 
