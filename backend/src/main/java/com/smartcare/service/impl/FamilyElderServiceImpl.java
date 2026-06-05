@@ -32,6 +32,14 @@ public class FamilyElderServiceImpl implements FamilyElderService {
 
     private final FallEventsMapper fallEventsMapper;
 
+    /**
+     * 删除老人绑定关系
+     * 校验用户是否有权限删除该老人，然后删除家属与老人的关联关系
+     *
+     * @param userId 用户ID（家属ID）
+     * @param elderId 老人ID
+     * @throws BusinessException 当用户ID或老人ID为空、无权删除或删除失败时抛出异常
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteElder(Long userId, Long elderId) {
@@ -56,6 +64,11 @@ public class FamilyElderServiceImpl implements FamilyElderService {
 
     /**
      * 查询指定家属绑定的老人列表
+     * 根据用户ID查询其绑定的所有老人信息
+     *
+     * @param userId 用户ID（家属ID）
+     * @return 老人VO列表
+     * @throws BusinessException 当用户ID为空时抛出异常
      */
     @Override
     public List<ElderVO> listMyElders(Long userId) {
@@ -68,6 +81,11 @@ public class FamilyElderServiceImpl implements FamilyElderService {
 
     /**
      * 添加老人信息，并绑定当前家属
+     * 先创建老人记录，再创建家属与老人的关联关系，使用事务保证数据一致性
+     *
+     * @param userId 用户ID（家属ID）
+     * @param dto 老人添加DTO，包含老人基本信息
+     * @throws BusinessException 当参数为空、保存老人或关系失败时抛出异常
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -134,6 +152,12 @@ public class FamilyElderServiceImpl implements FamilyElderService {
 
     /**
      * 查询某个老人的跌倒事件分页列表
+     * 校验用户权限后，分页查询指定老人的跌倒事件记录
+     * @param userId 用户ID（家属ID）
+     * @param elderId 老人ID
+     * @param pageQuery 分页查询参数
+     * @return 跌倒事件分页结果
+     * @throws BusinessException 当参数为空、老人不存在或无权查看时抛出异常
      */
     @Override
     public PageVo<ElderFallEventVO> listFallEvents(Long userId, Long elderId, PageQueryDTO pageQuery) {
@@ -181,6 +205,10 @@ public class FamilyElderServiceImpl implements FamilyElderService {
 
     /**
      * 修正分页参数
+     * 设置默认值和边界值：页码默认为1，每页大小默认为10，最大为100
+     *
+     * @param pageQuery 分页查询参数对象
+     * @throws BusinessException 当分页参数为空时抛出异常
      */
     private void fixPageQuery(PageQueryDTO pageQuery) {
         if (pageQuery == null) {
@@ -202,6 +230,11 @@ public class FamilyElderServiceImpl implements FamilyElderService {
 
     /**
      * 计算总页数
+     * 使用向上取整算法：(总数 + 每页大小 - 1) / 每页大小
+     *
+     * @param total 总记录数
+     * @param pageSize 每页大小
+     * @return 总页数，如果总数为0则返回0
      */
     private Long calculatePages(Long total, Integer pageSize) {
         if (total == null || total <= 0) {
